@@ -216,7 +216,7 @@ CREATE TABLE mouvement_stock (
 );
 
 -- =====================================================
--- MODULE INVENTAIRE (simplifie)
+-- MODULE INVENTAIRE (simplifié)
 -- =====================================================
 
 CREATE TABLE inventaire (
@@ -228,7 +228,12 @@ CREATE TABLE inventaire (
     id_valideur INT,
     
     CONSTRAINT fk_inv_depot FOREIGN KEY (id_depot) REFERENCES depot(id_depot),
-    CONSTRAINT fk_inv_valideur FOREIGN KEY (id_valideur) REFERENCES utilisateur(id_utilisateur)
+    CONSTRAINT fk_inv_valideur FOREIGN KEY (id_valideur) REFERENCES utilisateur(id_utilisateur),
+    -- Règle: On ne peut pas valider un inventaire qui n'est pas terminé
+    CONSTRAINT check_validation_coherence CHECK (
+        (statut = 'VALIDE' AND id_valideur IS NOT NULL) OR 
+        (statut = 'EN_COURS' AND id_valideur IS NULL)
+    )
 );
 
 CREATE TABLE ligne_inventaire (
@@ -242,129 +247,6 @@ CREATE TABLE ligne_inventaire (
     
     CONSTRAINT fk_ligne_inv FOREIGN KEY (id_inventaire) REFERENCES inventaire(id_inventaire) ON DELETE CASCADE,
     CONSTRAINT fk_ligne_inv_article FOREIGN KEY (id_article) REFERENCES article(id_article),
-    CONSTRAINT fk_ligne_inv_compteur FOREIGN KEY (id_compteur) REFERENCES utilisateur(id_utilisateur),
-    -- REGLE METIER : Le compteur ne peut pas valider son propre inventaire
-    CONSTRAINT check_compteur_valideur CHECK (
-        id_compteur != (SELECT id_valideur FROM inventaire WHERE id_inventaire = ligne_inventaire.id_inventaire)
-    )
+    CONSTRAINT fk_ligne_inv_compteur FOREIGN KEY (id_compteur) REFERENCES utilisateur(id_utilisateur)
 );
 
--- =====================================================
--- VUES METIER (pour faciliter les requetes)
--- =====================================================
-
--- Vue stock avec alertes
-CREATE VIEW v_stock_alerte AS
-SELECT 
-    a.code,
-    a.designation,
-    d.nom as depot,
-    s.quantite,
-    a.seuil_alerte,
-    CASE 
-        WHEN s.quantite <= a.seuil_alerte THEN 'ALERTE'
-        ELSE 'OK'
-    END as statut
-FROM stock s
-JOIN article a ON s.id_article = a.id_article
-JOIN depot d ON s.id_depot = d.id_depot;
-
--- Vue valorisation stock
-CREATE VIEW v_valorisation_stock AS
-SELECT 
-    a.code,
-    a.designation,
-    d.nom as depot,
-    s.quantite,
-    a.prix_achat,
-    (s.quantite * a.prix_achat) as valeur_stock
-FROM stock s
-JOIN article a ON s.id_article = a.id_article
-JOIN depot d ON s.id_depot = d.id_depot;
-
--- Vue commandes en attente de validation
-CREATE VIEW v_demandes_a_valider AS
-SELECT 
-    da.numero,
-    da.date_demande,
-    u.nom || ' ' || u.prenom as demandeur,
-    COUNT(l.id_ligne) as nb_lignes,
-    da.statut
-FROM demande_achat da
-JOIN utilisateur u ON da.id_demandeur = u.id_utilisateur
-LEFT JOIN ligne_demande_achat l ON da.id_demande = l.id_demande
-WHERE da.statut = 'EN_ATTENTE'
-GROUP BY da.id_demande, da.numero, da.date_demande, u.nom, u.prenom, da.statut;
-
--- =====================================================
--- INDEX ESSENTIELS
--- =====================================================
-
-CREATE INDEX idx_stock_article ON stock(id_article);
-CREATE INDEX idx_mouvement_date ON mouvement_stock(date_mouvement);
-CREATE INDEX idx_demande_statut ON demande_achat(statut);
-CREATE INDEX idx_commande_client_statut ON commande_client(statut);
-
--- =====================================================
--- DONNEES DE DEMO
--- =====================================================
-
--- Roles
-INSERT INTO role (nom_role, niveau_validation) VALUES
-('Admin', 2),
-('Responsable Achats', 2),
-('Acheteur', 1),
-('Magasinier', 0),
-('Commercial', 1),
-('Responsable Ventes', 2);
-
--- Utilisateurs
-INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, id_role) VALUES
-('ADMIN', 'Admin', 'admin@vente-tovo.mg', 'admin123', 1),
-('RAKOTO', 'Jean', 'jean@vente-tovo.mg', 'pass123', 2),
-('RABE', 'Marie', 'marie@vente-tovo.mg', 'pass123', 3),
-('RANDRIA', 'Paul', 'paul@vente-tovo.mg', 'pass123', 4),
-('RASOA', 'Sophie', 'sophie@vente-tovo.mg', 'pass123', 5);
-
--- Depots
-INSERT INTO depot (nom) VALUES
-('Depot Principal'),
-('Depot Secondaire');
-
--- Articles
-INSERT INTO article (code, designation, prix_achat, prix_vente, seuil_alerte) VALUES
-('ART001', 'Ordinateur Portable HP', 2500000, 3500000, 5),
-('ART002', 'Souris sans fil', 25000, 35000, 20),
-('ART003', 'Clavier mecanique', 150000, 200000, 10),
-('ART004', 'Ecran 24 pouces', 800000, 1200000, 5),
-('ART005', 'Cable HDMI', 15000, 25000, 30);
-
--- Stock initial
-INSERT INTO stock (id_article, id_depot, quantite) VALUES
-(1, 1, 10),
-(2, 1, 50),
-(3, 1, 25),
-(4, 1, 8),
-(5, 1, 100),
-(1, 2, 5),
-(2, 2, 30);
-
--- Fournisseurs
-INSERT INTO fournisseur (nom, email, telephone) VALUES
-('Tech Distribution MG', 'contact@techdist.mg', '034 00 111 22'),
-('Import Pro', 'info@importpro.mg', '033 11 222 33');
-
--- Clients
-INSERT INTO client (nom, email, telephone) VALUES
-('Entreprise ALPHA', 'alpha@company.mg', '034 22 333 44'),
-('Societe BETA', 'beta@company.mg', '033 33 444 55'),
-('GAMMA SARL', 'gamma@company.mg', '032 44 555 66');
-
--- =====================================================
--- COMMENTAIRES
--- =====================================================
-
-COMMENT ON DATABASE vente_tovo IS 'Systeme de gestion Achats/Ventes/Stock - Version Demo';
-COMMENT ON TABLE demande_achat IS 'REGLE: Le valideur doit etre different du demandeur';
-COMMENT ON TABLE commande_client IS 'REGLE: Remise > 10% necessite validation responsable';
-COMMENT ON TABLE ligne_inventaire IS 'REGLE: Le compteur ne peut pas valider son inventaire';

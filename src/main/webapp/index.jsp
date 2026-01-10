@@ -2,9 +2,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Accueil</title>
 </head>
 <body>
-<a href="entrer">Entrer</a>
+<a href="${pageContext.request.contextPath}/user/login">Se connecter</a>
 </body>
 </html>

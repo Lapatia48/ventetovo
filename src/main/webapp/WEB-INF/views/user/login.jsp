@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion RH - BusinessSuite</title>
+    <title>Connexion - BusinessSuite</title>
     <style>
         /* Variables CSS - Palette Oat Milk & Rich Burgundy */
         :root {
@@ -106,7 +106,8 @@
         }
 
         input[type="text"],
-        input[type="password"] {
+        input[type="password"],
+        select {
             width: 100%;
             padding: 16px 18px;
             border: 2px solid var(--gray-light);
@@ -118,7 +119,8 @@
         }
 
         input[type="text"]:focus,
-        input[type="password"]:focus {
+        input[type="password"]:focus,
+        select:focus {
             outline: none;
             border-color: var(--burgundy);
             background: white;
@@ -261,10 +263,15 @@
                 <p class="login-subtitle">Accès à l'application</p>
             </div>
 
-            <form action="logRh" method="post" class="login-form">
+            <form action="login" method="post" class="login-form">
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="text" id="email" name="email" value="" required>
+                    <select id="email" name="email" required style="width: 100%; padding: 16px 18px; border: 2px solid var(--gray-light); border-radius: var(--border-radius); font-size: 1rem; transition: var(--transition); background: var(--oat-milk); font-family: inherit;">
+                        <option value="">Sélectionnez un email</option>
+                        <c:forEach var="email" items="${emails}">
+                            <option value="${email}">${email}</option>
+                        </c:forEach>
+                    </select>
                 </div>
 
                 <div class="form-group">

@@ -53,6 +53,9 @@ INSERT INTO client (nom, email, telephone) VALUES
 ('Societe BETA', 'beta@company.mg', '033 33 444 55'),
 ('GAMMA SARL', 'gamma@company.mg', '032 44 555 66');
 
+-- Caisse initiale
+INSERT INTO caisse (solde) VALUES (10000000); -- 10 millions d'ariary
+
 -- =====================================================
 -- COMMENTAIRES
 -- =====================================================

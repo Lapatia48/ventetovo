@@ -250,3 +250,13 @@ CREATE TABLE ligne_inventaire (
     CONSTRAINT fk_ligne_inv_compteur FOREIGN KEY (id_compteur) REFERENCES utilisateur(id_utilisateur)
 );
 
+-- =====================================================
+-- CAISSE
+-- =====================================================
+
+CREATE TABLE caisse (
+    id_caisse SERIAL PRIMARY KEY,
+    solde NUMERIC(15,2) DEFAULT 0,
+    date_maj TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+

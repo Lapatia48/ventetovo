@@ -433,7 +433,7 @@
                 </thead>
                 <tbody>
                     <c:forEach var="article" items="${articles}">
-                        <tr>
+                        <tr data-stock="${stockMap[article.idArticle]}" data-seuil="${article.seuilAlerte}">
                             <td>${article.idArticle}</td>
                             <td><strong>${article.code}</strong></td>
                             <td>${article.designation}</td>
@@ -442,7 +442,7 @@
                             <td>${article.seuilAlerte}</td>
                             <td>
                                 <c:choose>
-                                    <c:when test="${article.seuilAlerte < 10}">
+                                    <c:when test="${stockMap[article.idArticle] lt article.seuilAlerte}">
                                         <span class="seuil-alerte seuil-bas">Stock faible</span>
                                     </c:when>
                                     <c:otherwise>
@@ -487,12 +487,13 @@
             document.getElementById('filterForm').submit();
         });
 
-        // Mise en évidence des lignes avec stock faible
+        // Mise en évidence des lignes avec stock faible (compare stock réel au seuil)
         document.addEventListener('DOMContentLoaded', function() {
             const rows = document.querySelectorAll('tbody tr');
             rows.forEach(row => {
-                const seuilCell = row.cells[5];
-                if (seuilCell && parseInt(seuilCell.textContent) < 10) {
+                const stock = parseInt(row.dataset.stock || '0');
+                const seuil = parseInt(row.dataset.seuil || '0');
+                if (!isNaN(stock) && !isNaN(seuil) && stock < seuil) {
                     row.style.backgroundColor = 'rgba(255, 193, 7, 0.1)';
                 }
             });

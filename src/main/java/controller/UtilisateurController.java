@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.HashMap;
 
 @Controller
 @RequestMapping("/user")
@@ -74,7 +76,16 @@ public class UtilisateurController {
                                @RequestParam(value = "seuilFilter", required = false) String seuilFilter,
                                Model model) {
         List<Article> allArticles = articleService.findAll();
-        
+
+        // Calculer le stock total par article (tous dépôts)
+        Map<Long, Integer> stockMap = new HashMap<>();
+        for (Article a : allArticles) {
+            int total = stockService.findByArticle(a).stream()
+                    .mapToInt(s -> s.getQuantite() != null ? s.getQuantite() : 0)
+                    .sum();
+            stockMap.put(a.getIdArticle(), total);
+        }
+
         // Appliquer les filtres
         List<Article> filteredArticles = allArticles.stream()
             .filter(article -> {
@@ -98,12 +109,13 @@ public class UtilisateurController {
                     return false;
                 }
                 
-                // Filtre seuil d'alerte
+                // Filtre seuil d'alerte : comparer le stock réel à seuilAlerte
                 if (seuilFilter != null && !seuilFilter.trim().isEmpty()) {
-                    if ("low".equals(seuilFilter) && article.getSeuilAlerte() >= 10) {
+                    Integer totalStock = stockMap.getOrDefault(article.getIdArticle(), 0);
+                    if ("low".equals(seuilFilter) && !(totalStock < (article.getSeuilAlerte() != null ? article.getSeuilAlerte() : 0))) {
                         return false;
                     }
-                    if ("normal".equals(seuilFilter) && article.getSeuilAlerte() < 10) {
+                    if ("normal".equals(seuilFilter) && (totalStock < (article.getSeuilAlerte() != null ? article.getSeuilAlerte() : 0))) {
                         return false;
                     }
                 }
@@ -115,7 +127,11 @@ public class UtilisateurController {
         // Calculer les statistiques
         int totalProducts = allArticles.size();
         long lowStockProducts = allArticles.stream()
-            .filter(article -> article.getSeuilAlerte() < 10)
+            .filter(article -> {
+                Integer totalStock = stockMap.getOrDefault(article.getIdArticle(), 0);
+                Integer seuil = article.getSeuilAlerte() != null ? article.getSeuilAlerte() : 0;
+                return totalStock < seuil;
+            })
             .count();
         double avgPrice = allArticles.stream()
             .filter(article -> article.getPrixVente() != null)
@@ -126,6 +142,7 @@ public class UtilisateurController {
         
         // Ajouter au modèle
         model.addAttribute("articles", filteredArticles);
+        model.addAttribute("stockMap", stockMap);
         model.addAttribute("totalProducts", totalProducts);
         model.addAttribute("lowStockProducts", (int) lowStockProducts);
         model.addAttribute("avgPrice", String.format("%.2f", avgPrice));

@@ -43,3 +43,26 @@ CREATE TABLE prix (
     FOREIGN KEY (id_article) REFERENCES article(id_article),
     FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id_fournisseur)
 );
+
+
+-- Table pour les proformas
+CREATE TABLE proforma (
+    id_proforma SERIAL PRIMARY KEY,
+    numero VARCHAR(50) UNIQUE NOT NULL,
+    token_demande VARCHAR(64) NOT NULL, -- Token unique pour regrouper les proformas d'une même demande
+    id_article INT NOT NULL,
+    id_fournisseur INT NOT NULL,
+    quantite INT NOT NULL,
+    prix_unitaire NUMERIC(15,2) NOT NULL,
+    montant_total NUMERIC(15,2) NOT NULL,
+    date_proforma TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    statut VARCHAR(20) DEFAULT 'EN_ATTENTE' CHECK (statut IN ('EN_ATTENTE', 'SELECTIONNE', 'REJETE')),
+    
+    FOREIGN KEY (id_article) REFERENCES article(id_article),
+    FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id_fournisseur)
+);
+
+-- Index pour optimiser les requêtes
+CREATE INDEX idx_proforma_token ON proforma(token_demande);
+CREATE INDEX idx_proforma_article ON proforma(id_article);
+CREATE INDEX idx_proforma_fournisseur ON proforma(id_fournisseur);

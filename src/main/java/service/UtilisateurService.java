@@ -1,71 +1,71 @@
 package service;
 
-import entity.Role;
-import entity.Utilisateur;
-import repository.UtilisateurRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
-@Transactional
-public class UtilisateurService {
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import entity.Role;
+import entity.Utilisateur;
+import repository.RoleRepository;
+import repository.UtilisateurRepository;
+
+@Service
+public class UtilisateurService {
+    
     @Autowired
     private UtilisateurRepository utilisateurRepository;
-
+    
+    @Autowired
+    private RoleRepository roleRepository;
+    
     public List<Utilisateur> findAll() {
-        return utilisateurRepository.findAll();
+        List<Utilisateur> utilisateurs = utilisateurRepository.findAll();
+        // Enrichir avec les informations du rôle
+        for (Utilisateur utilisateur : utilisateurs) {
+            enrichirAvecRole(utilisateur);
+        }
+        return utilisateurs;
     }
-
-    public List<Utilisateur> findByActifTrue() {
-        return utilisateurRepository.findByActifTrue();
+    
+    public Optional<Utilisateur> findById(Integer id) {
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findById(id);
+        utilisateurOpt.ifPresent(this::enrichirAvecRole);
+        return utilisateurOpt;
     }
-
-    public Optional<Utilisateur> findById(Long id) {
-        return utilisateurRepository.findById(id);
-    }
-
+    
     public Optional<Utilisateur> findByEmail(String email) {
-        return utilisateurRepository.findByEmail(email);
+        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findByEmail(email);
+        utilisateurOpt.ifPresent(this::enrichirAvecRole);
+        return utilisateurOpt;
     }
-
-    public List<Utilisateur> findByRole(Role role) {
-        return utilisateurRepository.findByRoleIdRole(role.getIdRole());
+    
+    public List<Utilisateur> findByActifTrue() {
+        List<Utilisateur> utilisateurs = utilisateurRepository.findByActifTrue();
+        for (Utilisateur utilisateur : utilisateurs) {
+            enrichirAvecRole(utilisateur);
+        }
+        return utilisateurs;
     }
-
+    
     public Utilisateur save(Utilisateur utilisateur) {
         return utilisateurRepository.save(utilisateur);
     }
-
-    public void deleteById(Long id) {
+    
+    public void delete(Integer id) {
         utilisateurRepository.deleteById(id);
     }
-
-    public boolean existsByEmail(String email) {
-        return utilisateurRepository.existsByEmail(email);
+    
+    public boolean authenticate(String email, String motDePasse) {
+        Optional<Utilisateur> userOpt = utilisateurRepository.findByEmailAndMotDePasse(email, motDePasse);
+        return userOpt.isPresent();
     }
-
-    // Méthode pour désactiver un utilisateur
-    public void deactivateUtilisateur(Long id) {
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findById(id);
-        if (utilisateurOpt.isPresent()) {
-            Utilisateur utilisateur = utilisateurOpt.get();
-            utilisateur.setActif(false);
-            utilisateurRepository.save(utilisateur);
-        }
-    }
-
-    // Méthode pour activer un utilisateur
-    public void activateUtilisateur(Long id) {
-        Optional<Utilisateur> utilisateurOpt = utilisateurRepository.findById(id);
-        if (utilisateurOpt.isPresent()) {
-            Utilisateur utilisateur = utilisateurOpt.get();
-            utilisateur.setActif(true);
-            utilisateurRepository.save(utilisateur);
+    
+    private void enrichirAvecRole(Utilisateur utilisateur) {
+        if (utilisateur != null && utilisateur.getIdRole() != null) {
+            Optional<Role> roleOpt = roleRepository.findById(utilisateur.getIdRole());
+            roleOpt.ifPresent(utilisateur::setRole);
         }
     }
 }

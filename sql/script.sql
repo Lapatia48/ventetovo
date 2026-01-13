@@ -42,6 +42,8 @@ CREATE TABLE article (
     id_article SERIAL PRIMARY KEY,
     code VARCHAR(50) UNIQUE NOT NULL,
     designation VARCHAR(200) NOT NULL,
+    id_fournisseur INT,
+    CONSTRAINT fk_article_fournisseur FOREIGN KEY (id_fournisseur) REFERENCES fournisseur(id_fournisseur),
     prix_achat NUMERIC(15,2) DEFAULT 0,
     prix_vente NUMERIC(15,2) NOT NULL,
     seuil_alerte INT DEFAULT 10

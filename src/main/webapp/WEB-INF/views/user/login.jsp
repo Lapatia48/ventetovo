@@ -273,10 +273,10 @@
                         </c:forEach>
                     </select>
                 </div>
-
+                <input type="hidden" name="id" value="${id}" />
                 <div class="form-group">
                     <label for="motDePasse">Mot de passe</label>
-                    <input type="password" id="motDePasse" name="motDePasse" value="" required>
+                    <input type="password" id="motDePasse" name="motDePasse" value="1234" required>
                 </div>
 
                 <button type="submit" class="login-btn">Se connecter</button>

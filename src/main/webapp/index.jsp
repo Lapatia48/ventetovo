@@ -5,6 +5,7 @@
     <title>Accueil</title>
 </head>
 <body>
-<a href="${pageContext.request.contextPath}/user/login">Se connecter</a>
+<a href="${pageContext.request.contextPath}/user/accueil">Entrer</a>
+<!-- <a href="${pageContext.request.contextPath}/user/login">Se connecter</a> -->
 </body>
 </html>

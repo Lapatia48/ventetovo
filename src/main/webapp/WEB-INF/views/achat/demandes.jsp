@@ -13,7 +13,6 @@
         <c:set var="proformas" value="${demande.value}" />
         <c:if test="${not empty proformas}">
             <div style="border: 1px solid #ccc; padding: 15px; margin: 10px 0;">
-                <h3>Demande: ${proformas[0].tokenDemande}</h3>
                 <p><strong>Article:</strong> 
                     <c:if test="${not empty proformas[0].article}">
                         ${proformas[0].article.code} - ${proformas[0].article.designation}

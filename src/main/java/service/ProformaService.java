@@ -35,6 +35,9 @@ public class ProformaService {
     
     @Autowired
     private PrixRepository prixRepository;
+
+    @Autowired
+    private BonCommandeService bonCommandeService;
     
     // Générer un token unique pour une demande
     public String genererTokenDemande() {
@@ -172,5 +175,18 @@ public class ProformaService {
     // Récupérer une proforma par son ID
     public Optional<Proforma> findById(Integer idProforma) {
         return proformaRepository.findById(idProforma);
+    }
+    
+    public void validerProformaPourBonCommande(Integer idProforma) {
+    Optional<Proforma> proformaOpt = proformaRepository.findById(idProforma);
+        if (proformaOpt.isPresent()) {
+            Proforma proforma = proformaOpt.get();
+            
+            // Marquer la proforma comme sélectionnée
+            selectionnerProforma(idProforma);
+            
+            // Créer automatiquement un bon de commande
+            bonCommandeService.creerBonCommandeFromProforma(idProforma);
+        }
     }
 }

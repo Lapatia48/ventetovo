@@ -7,15 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import entity.Proforma;
 import entity.Utilisateur;
+import entity.VBonCommande;
 import jakarta.servlet.http.HttpSession;
 import service.AchatFinanceService;
 import service.ArticleService;
+import service.BonCommandeService;
 import service.ProformaService;
+import service.VBonCommandeService;
 
 @Controller
 public class AchatController {
@@ -28,6 +32,12 @@ public class AchatController {
 
     @Autowired
     private AchatFinanceService achatFinanceService;
+
+    @Autowired
+    private BonCommandeService bonCommandeService;
+
+    @Autowired
+    private VBonCommandeService vBonCommandeService;
 
     @GetMapping("/achat/achat")
     public String achat(Model model) {
@@ -155,6 +165,8 @@ public class AchatController {
         
         // Valider la proforma
         proformaService.selectionnerProforma(idProforma);
+
+        bonCommandeService.creerBonCommandeFromProforma(idProforma);
         
         // Ajouter un message de succès
         model.addAttribute("success", "Proforma validée avec succès !");
@@ -166,5 +178,21 @@ public class AchatController {
     public String listeDemandes(Model model) {
         model.addAttribute("demandes", proformaService.getAllDemandes());
         return "achat/demandes";
+    }
+
+
+    @GetMapping("/bc/list")
+    public String listeBonCommandes(Model model) {
+        List<VBonCommande> bonsCommande = vBonCommandeService.findAll();
+        model.addAttribute("bonsCommande", bonsCommande);
+        return "achat/bc-liste";
+    }
+
+    // Détail d'un bon de commande
+    @GetMapping("/bc/detail/{id}")
+    public String detailBonCommande(@PathVariable("id") Integer idBonCommande, Model model) {
+        VBonCommande bonCommande = vBonCommandeService.findById(idBonCommande);
+        model.addAttribute("bonCommande", bonCommande);
+        return "achat/bc-detail";
     }
 }

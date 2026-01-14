@@ -7,6 +7,7 @@
     <title>Liste des articles</title>
 </head>
 <body>
+    <p><a href="${pageContext.request.contextPath}/achat/demandes">Voir toutes les demandes</a></p>
     <h2>Liste des articles</h2>
     
     <table border="1">

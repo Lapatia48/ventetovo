@@ -66,3 +66,15 @@ CREATE TABLE proforma (
 CREATE INDEX idx_proforma_token ON proforma(token_demande);
 CREATE INDEX idx_proforma_article ON proforma(id_article);
 CREATE INDEX idx_proforma_fournisseur ON proforma(id_fournisseur);
+
+
+-- table bon de commande
+CREATE TABLE bon_commande (
+    id_bon_commande SERIAL PRIMARY KEY,
+    numero VARCHAR(50) UNIQUE NOT NULL,
+    id_proforma INT NOT NULL,
+    date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    statut VARCHAR(20) DEFAULT 'EN_COURS' CHECK (statut IN ('EN_COURS', 'LIVRE', 'ANNULE')),
+    
+    FOREIGN KEY (id_proforma) REFERENCES proforma(id_proforma)
+);

@@ -14,6 +14,5 @@
         <input type="hidden" name="idArticle" value="${idArticle}">
         <button type="submit">Valider</button>
     </form>
-    <p>${idArticle}</p>
 </body>
 </html>

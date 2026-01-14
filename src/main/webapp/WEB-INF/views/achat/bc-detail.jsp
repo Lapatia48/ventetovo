@@ -112,15 +112,18 @@
             </div>
         </div>
         
-        <form action="${pageContext.request.contextPath}/genererFactureFournisseur" method="post">
-            <input type="hidden" name="idBonCommande" value="${bonCommande.idBonCommande}">
-            <button type="submit">Générer facture fournisseur</button>
-        </form>
+        <div style="margin-top: 20px;">
+            <form action="${pageContext.request.contextPath}/genererFactureFournisseur" method="post" style="display: inline;">
+                <input type="hidden" name="idBonCommande" value="${bonCommande.idBonCommande}">
+                <button type="submit" style="padding: 10px 15px; background-color: #28a745; color: white; border: none; cursor: pointer;">
+                    📄 Générer facture fournisseur
+                </button>
+            </form>
+        </div>
         
         <br>
-        <a href="${pageContext.request.contextPath}/bc/list"> Retour à la liste</a>
-        &nbsp;&nbsp;
-        <a href="${pageContext.request.contextPath}/achat/achat"> Accueil</a>
+        <a href="${pageContext.request.contextPath}/bc/list">← Retour à la liste</a> |
+        <a href="${pageContext.request.contextPath}/achat/achat">🏠 Menu achat</a>
     </c:if>
 </body>
 </html>

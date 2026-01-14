@@ -17,7 +17,14 @@ import entity.Proforma;
 import entity.Utilisateur;
 import entity.VBonCommande;
 import jakarta.servlet.http.HttpSession;
-import service.*;
+import service.AchatFinanceService;
+import service.ArticleService;
+import service.BonCommandeService;
+import service.BonLivraisonService;
+import service.BonReceptionService;
+import service.FactureFournisseurService;
+import service.ProformaService;
+import service.VBonCommandeService;
 
 @Controller
 public class AchatController {
@@ -42,6 +49,9 @@ public class AchatController {
 
     @Autowired
     private BonLivraisonService bonLivraisonService;
+
+    @Autowired
+    private BonReceptionService bonReceptionService;
 
     @GetMapping("/achat/achat")
     public String achat(Model model) {
@@ -309,5 +319,106 @@ public class AchatController {
             model.addAttribute("error", "Bon de livraison introuvable.");
             return "redirect:/bonLivraison/list";
         }
+    }
+
+    // Afficher le formulaire de création d'un bon de réception
+    @GetMapping("/bonReception/form/{idBonLivraison}")
+    public String formulaireBonReception(@PathVariable("idBonLivraison") Integer idBonLivraison, 
+                                        Model model) {
+        Optional<BonLivraison> bonLivraisonOpt = bonLivraisonService.findById(idBonLivraison);
+        if (bonLivraisonOpt.isPresent()) {
+            BonLivraison bonLivraison = bonLivraisonOpt.get();
+            model.addAttribute("bonLivraison", bonLivraison);
+            
+            // Vérifier si un bon de réception existe déjà
+            List<entity.BonReception> receptionsExistantes = bonReceptionService.findByIdBonLivraison(idBonLivraison);
+            if (!receptionsExistantes.isEmpty()) {
+                model.addAttribute("receptionExistante", receptionsExistantes.get(0));
+                model.addAttribute("info", "Un bon de réception existe déjà pour cette livraison.");
+            }
+            
+            return "achat/bonreception-form";
+        } else {
+            model.addAttribute("error", "Bon de livraison introuvable.");
+            return "redirect:/bonLivraison/list";
+        }
+    }
+
+    // Enregistrer un bon de réception
+    @PostMapping("/bonReception/enregistrer")
+    public String enregistrerBonReception(@RequestParam("idBonLivraison") Integer idBonLivraison,
+                                         @RequestParam("idArticle") Integer idArticle,
+                                         @RequestParam("quantiteCommandee") Integer quantiteCommandee,
+                                         @RequestParam("quantiteRecue") Integer quantiteRecue,
+                                         @RequestParam(value = "quantiteNonConforme", defaultValue = "0") Integer quantiteNonConforme,
+                                         @RequestParam(value = "commentaire", required = false) String commentaire,
+                                         HttpSession session,
+                                         Model model) {
+        
+        Utilisateur utilisateurConnecte = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateurConnecte == null) {
+            model.addAttribute("error", "Vous devez être connecté.");
+            return "redirect:/user/login";
+        }
+        
+        // Créer le bon de réception
+        entity.BonReception bonReception = bonReceptionService.enregistrerReception(
+            idBonLivraison, idArticle, quantiteCommandee, quantiteRecue, 
+            quantiteNonConforme, commentaire);
+        
+        bonReception.setIdReceptionnaire(utilisateurConnecte.getIdUtilisateur());
+        bonReceptionService.save(bonReception);
+        
+        // Rediriger vers la page de comparaison
+        return "redirect:/bonReception/comparaison/" + idBonLivraison;
+    }
+
+    // Page de comparaison BL et BR
+    @GetMapping("/bonReception/comparaison/{idBonLivraison}")
+    public String comparaisonBLBR(@PathVariable("idBonLivraison") Integer idBonLivraison, Model model) {
+        Optional<BonLivraison> bonLivraisonOpt = bonLivraisonService.findById(idBonLivraison);
+        List<entity.BonReception> bonReceptions = bonReceptionService.findByIdBonLivraison(idBonLivraison);
+        
+        if (bonLivraisonOpt.isPresent() && !bonReceptions.isEmpty()) {
+            BonLivraison bonLivraison = bonLivraisonOpt.get();
+            entity.BonReception bonReception = bonReceptions.get(0);
+            
+            model.addAttribute("bonLivraison", bonLivraison);
+            model.addAttribute("bonReception", bonReception);
+            
+            // Calculer si les quantités correspondent
+            boolean correspondanceParfaite = bonReception.getQuantiteRecue().equals(bonReception.getQuantiteCommandee())
+                                           && bonReception.getQuantiteNonConforme() == 0;
+            model.addAttribute("correspondanceParfaite", correspondanceParfaite);
+            
+            return "achat/bonreception-comparaison";
+        } else {
+            model.addAttribute("error", "Bon de livraison ou réception introuvable.");
+            return "redirect:/bonLivraison/list";
+        }
+    }
+
+    // Valider la réception et gérer le mouvement de caisse
+    @PostMapping("/bonReception/valider")
+    public String validerReception(@RequestParam("idBonLivraison") Integer idBonLivraison,
+                                  @RequestParam("idBonReception") Integer idBonReception,
+                                  HttpSession session,
+                                  Model model) {
+        
+        Utilisateur utilisateurConnecte = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateurConnecte == null) {
+            model.addAttribute("error", "Vous devez être connecté.");
+            return "redirect:/user/login";
+        }
+        
+        // Marquer le bon de livraison comme reçu
+        bonLivraisonService.marquerCommeRecu(idBonLivraison);
+        
+        // TODO: Gérer le mouvement de caisse ici (enregistrer le paiement, etc.)
+        // Ce serait typiquement une nouvelle table "mouvement_caisse" à créer
+        
+        model.addAttribute("success", "Réception validée avec succès. Le stock a été mis à jour.");
+        
+        return "redirect:/bonLivraison/list";
     }
 }

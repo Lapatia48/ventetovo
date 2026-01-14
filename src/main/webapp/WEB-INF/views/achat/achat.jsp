@@ -4,17 +4,19 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Liste des articles</title>
+    <title>Module Achat</title>
 </head>
 <body>
-    <p><a href="${pageContext.request.contextPath}/achat/demandes">Voir toutes les demandes</a></p>
-    <p><a href="${pageContext.request.contextPath}/bc/list">Liste des bons de commande</a></p>
-    <p><a href="${pageContext.request.contextPath}/factureFournisseur/list">Liste des factures fournisseurs</a></p>
-    <p><a href="${pageContext.request.contextPath}/bonLivraison/list">Bons de livraison</a></p>
+    <h1>🛒 Module d'Achat</h1>
     
+    <h3>Navigation</h3>
+    <p><a href="${pageContext.request.contextPath}/achat/demandes">📋 Voir toutes les demandes</a></p>
+    <p><a href="${pageContext.request.contextPath}/bc/list">📦 Liste des bons de commande</a></p>
+    <p><a href="${pageContext.request.contextPath}/factureFournisseur/list">🧾 Liste des factures fournisseurs</a></p>
+    <p><a href="${pageContext.request.contextPath}/bonLivraison/list">🚚 Bons de livraison</a></p>
+    <hr>
 
-
-    <h2>Liste des articles</h2>
+    <h2>📦 Liste des Articles - Demande d'Achat</h2>
     
     <table border="1">
         <thead>

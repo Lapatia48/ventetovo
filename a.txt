@@ -1,0 +1,4 @@
+finaliser ce projet spring mvc du module achat
+Le controlleur est AchatControlleur.java et la base et vue dans le dossier sql
+Le scenario actuel est: on achete un produit, cela creer demandes d'achat, et les proformas, une fois un proforma selectionnee, on a des checks et cela creer un bon de commadne, un bon de commadne devient ensuite une facture fournisseur
+Et la on doit avoir les details du proforma de l'achat dans ce facture fournisseur pas juste les prix, ensuite receptionner cela genere un bon de livraison, et la on doit avoir un lien de formulaire pour un bon de reception, table entity repository et service encore a creer, puis une derniere page pour comparer si BL et br sont identiques, cotes a cotes et un bontoun valider avant de gerer le mouvement de caisse, finaliser ce projet dans cette chronolie, corriger les liens des jsp...generer des jsp simple sans css comme deja present

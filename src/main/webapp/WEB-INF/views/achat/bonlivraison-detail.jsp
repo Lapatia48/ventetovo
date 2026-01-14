@@ -129,37 +129,30 @@
         <!-- Formulaire de réception -->
         <c:if test="${bonLivraison.statut == 'EN_ATTENTE'}">
             <div class="reception-form">
-                <h3> Réception de la livraison</h3>
-                <form action="${pageContext.request.contextPath}/bonLivraison/receptionner" method="post">
-                    <input type="hidden" name="idBonLivraison" value="${bonLivraison.idBonLivraison}">
-                    
-                    <div style="margin: 10px 0;">
-                        <label>Quantité reçue:</label>
-                        <input type="number" name="quantiteRecue" required 
-                               value="${bonLivraison.bonCommande.proforma.quantite}"
-                               min="0" max="${bonLivraison.bonCommande.proforma.quantite}">
-                    </div>
-                    
-                    <div style="margin: 10px 0;">
-                        <label>Quantité non conforme:</label>
-                        <input type="number" name="quantiteNonConforme" value="0" min="0">
-                    </div>
-                    
-                    <div style="margin: 10px 0;">
-                        <label>Commentaire:</label><br>
-                        <textarea name="commentaire" rows="3" style="width: 300px;"></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-action btn-receptionner">
-                         Enregistrer la réception
-                    </button>
-                </form>
+                <h3>📝 Créer un Bon de Réception</h3>
+                <p>Pour enregistrer la réception de cette livraison, cliquez sur le bouton ci-dessous:</p>
+                <a href="${pageContext.request.contextPath}/bonReception/form/${bonLivraison.idBonLivraison}" 
+                   class="btn-action btn-receptionner">
+                    📦 Créer un bon de réception
+                </a>
+            </div>
+        </c:if>
+        
+        <c:if test="${bonLivraison.statut == 'RECU'}">
+            <div style="background-color: #d4edda; border: 1px solid #c3e6cb; padding: 15px; margin: 20px 0; border-radius: 5px;">
+                <strong>✅ Cette livraison a été réceptionnée.</strong>
             </div>
         </c:if>
         
         <div style="margin-top: 20px;">
             <a href="${pageContext.request.contextPath}/bonLivraison/list" class="btn-action btn-retour">
                 ← Retour à la liste
+            </a> |
+            <a href="${pageContext.request.contextPath}/factureFournisseur/list" class="btn-action btn-retour">
+                Factures
+            </a> |
+            <a href="${pageContext.request.contextPath}/achat/achat" class="btn-action btn-retour">
+                🏠 Menu achat
             </a>
         </div>
     </c:if>

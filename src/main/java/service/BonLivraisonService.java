@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import entity.BonCommande;
 import entity.BonLivraison;
 import repository.BonCommandeRepository;
 import repository.BonLivraisonRepository;
@@ -20,6 +19,9 @@ public class BonLivraisonService {
     
     @Autowired
     private BonCommandeRepository bonCommandeRepository;
+    
+    @Autowired
+    private BonCommandeService bonCommandeService;
     
     // Find by ID Bon Commande
     public List<BonLivraison> findByIdBonCommande(Integer idBonCommande) {
@@ -71,8 +73,14 @@ public class BonLivraisonService {
     
     private void enrichirAvecBonCommande(BonLivraison bonLivraison) {
         if (bonLivraison != null && bonLivraison.getIdBonCommande() != null) {
-            Optional<BonCommande> bonCommandeOpt = bonCommandeRepository.findById(bonLivraison.getIdBonCommande());
-            bonCommandeOpt.ifPresent(bonLivraison::setBonCommande);
+            // Utiliser le service pour obtenir le bon de commande enrichi avec proforma, article et fournisseur
+            bonCommandeRepository.findById(bonLivraison.getIdBonCommande()).ifPresent(bc -> {
+                if (bc.getIdProforma() != null) {
+                    bonCommandeService.findByIdProforma(bc.getIdProforma()).ifPresent(bonLivraison::setBonCommande);
+                } else {
+                    bonLivraison.setBonCommande(bc);
+                }
+            });
         }
     }
 

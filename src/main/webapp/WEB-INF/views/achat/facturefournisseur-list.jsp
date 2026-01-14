@@ -66,11 +66,17 @@
                 <c:forEach var="facture" items="${factures}">
                     <tr>
                         <td>${facture.numeroFacture}</td>
-                        <td>${facture.idBonCommande}</td>
                         <td>
-                            <c:if test="${not empty facture.bonCommande}">
-                                <!-- Vous devrez enrichir la facture avec les infos du fournisseur -->
-                                Fournisseur #${facture.idBonCommande}
+                            <a href="${pageContext.request.contextPath}/bc/detail/${facture.idBonCommande}">
+                                BC #${facture.idBonCommande}
+                            </a>
+                        </td>
+                        <td>
+                            <c:if test="${not empty facture.bonCommande && not empty facture.bonCommande.proforma && not empty facture.bonCommande.proforma.fournisseur}">
+                                ${facture.bonCommande.proforma.fournisseur.nom}
+                            </c:if>
+                            <c:if test="${empty facture.bonCommande || empty facture.bonCommande.proforma || empty facture.bonCommande.proforma.fournisseur}">
+                                -
                             </c:if>
                         </td>
                         <td>${facture.dateFacture}</td>
@@ -107,6 +113,11 @@
     </c:if>
     
     <br>
+    <a href="${pageContext.request.contextPath}/bc/list">← Retour aux bons de commande</a> |
+    <a href="${pageContext.request.contextPath}/bonLivraison/list">Bons de livraison</a> |
+    <a href="${pageContext.request.contextPath}/achat/achat">🏠 Menu achat</a>
+</body>
+</html>    <br>
     <a href="${pageContext.request.contextPath}/bc/list">← Retour aux bons de commande</a>
     &nbsp;&nbsp;
     <a href="${pageContext.request.contextPath}/achat/achat">🏠 Accueil</a>

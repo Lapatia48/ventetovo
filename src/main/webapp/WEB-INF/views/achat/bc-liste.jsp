@@ -62,6 +62,7 @@
     </c:if>
     
     <br>
-    <a href="${pageContext.request.contextPath}/achat/achat">Retour aux articles</a>
+    <a href="${pageContext.request.contextPath}/achat/achat">← Retour au menu achat</a> |
+    <a href="${pageContext.request.contextPath}/factureFournisseur/list">Liste des factures</a>
 </body>
 </html>

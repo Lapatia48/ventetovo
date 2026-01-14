@@ -1,13 +1,17 @@
 package service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import entity.BonCommande;
-import entity.Proforma;
-import repository.BonCommandeRepository;
-import repository.ProformaRepository;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import entity.BonCommande;
+import entity.Proforma;
+import repository.ArticleRepository;
+import repository.BonCommandeRepository;
+import repository.FournisseurRepository;
+import repository.ProformaRepository;
 
 @Service
 public class BonCommandeService {
@@ -17,6 +21,12 @@ public class BonCommandeService {
     
     @Autowired
     private ProformaRepository proformaRepository;
+    
+    @Autowired
+    private ArticleRepository articleRepository;
+    
+    @Autowired
+    private FournisseurRepository fournisseurRepository;
     
     // Find by ID Proforma
     public Optional<BonCommande> findByIdProforma(Integer idProforma) {
@@ -61,7 +71,19 @@ public class BonCommandeService {
     private void enrichirAvecProforma(BonCommande bonCommande) {
         if (bonCommande != null && bonCommande.getIdProforma() != null) {
             Optional<Proforma> proformaOpt = proformaRepository.findById(bonCommande.getIdProforma());
-            proformaOpt.ifPresent(bonCommande::setProforma);
+            if (proformaOpt.isPresent()) {
+                Proforma proforma = proformaOpt.get();
+                
+                // Enrichir la proforma avec l'article et le fournisseur
+                if (proforma.getIdArticle() != null) {
+                    articleRepository.findById(proforma.getIdArticle()).ifPresent(proforma::setArticle);
+                }
+                if (proforma.getIdFournisseur() != null) {
+                    fournisseurRepository.findById(proforma.getIdFournisseur()).ifPresent(proforma::setFournisseur);
+                }
+                
+                bonCommande.setProforma(proforma);
+            }
         }
     }
 }

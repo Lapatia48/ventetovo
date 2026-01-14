@@ -21,6 +21,9 @@ public class FactureFournisseurService {
     @Autowired
     private BonCommandeRepository bonCommandeRepository;
     
+    @Autowired
+    private BonCommandeService bonCommandeService;
+    
     // Find by ID Bon Commande
     public Optional<FactureFournisseur> findByIdBonCommande(Integer idBonCommande) {
         Optional<FactureFournisseur> factureOpt = factureFournisseurRepository.findByIdBonCommande(idBonCommande);
@@ -76,7 +79,16 @@ public class FactureFournisseurService {
     private void enrichirAvecBonCommande(FactureFournisseur facture) {
         if (facture != null && facture.getIdBonCommande() != null) {
             Optional<BonCommande> bonCommandeOpt = bonCommandeRepository.findById(facture.getIdBonCommande());
-            bonCommandeOpt.ifPresent(facture::setBonCommande);
+            if (bonCommandeOpt.isPresent()) {
+                // Utiliser le service pour enrichir avec proforma (qui enrichit aussi article et fournisseur)
+                if (bonCommandeOpt.get().getIdProforma() != null) {
+                    bonCommandeService.findByIdProforma(bonCommandeOpt.get().getIdProforma()).ifPresent(enriched -> {
+                        facture.setBonCommande(enriched);
+                    });
+                } else {
+                    facture.setBonCommande(bonCommandeOpt.get());
+                }
+            }
         }
     }
 

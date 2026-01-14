@@ -86,16 +86,7 @@
                                class="btn-action btn-detail">
                                 Détail
                             </a>
-                            
-                            <c:if test="${livraison.statut == 'EN_ATTENTE'}">
-                                <form action="${pageContext.request.contextPath}/bonLivraison/receptionner" 
-                                      method="post" style="display: inline;">
-                                    <input type="hidden" name="idBonLivraison" value="${livraison.idBonLivraison}">
-                                    <button type="submit" class="btn-action btn-receptionner">
-                                        Réceptionner
-                                    </button>
-                                </form>
-                            </c:if>
+                        
                         </td>
                     </tr>
                 </c:forEach>
@@ -104,8 +95,7 @@
     </c:if>
     
     <br>
-    <a href="${pageContext.request.contextPath}/factureFournisseur/list">← Retour aux factures</a>
-    &nbsp;&nbsp;
-    <a href="${pageContext.request.contextPath}/achat/achat">🏠 Accueil</a>
+    <a href="${pageContext.request.contextPath}/factureFournisseur/list">← Retour aux factures</a> |
+    <a href="${pageContext.request.contextPath}/achat/achat">🏠 Menu achat</a>
 </body>
 </html>

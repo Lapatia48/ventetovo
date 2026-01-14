@@ -99,11 +99,20 @@
                 </div>
                 
                 <c:if test="${not empty facture.bonCommande.proforma}">
+                    <hr>
+                    <h3>📋 Détails du Proforma</h3>
+                    
+                    <div class="info-row">
+                        <span class="label">Numéro proforma:</span>
+                        <span class="value">${facture.bonCommande.proforma.numero}</span>
+                    </div>
+                    
                     <div class="info-row">
                         <span class="label">Article:</span>
                         <span class="value">
                             <c:if test="${not empty facture.bonCommande.proforma.article}">
-                                ${facture.bonCommande.proforma.article.designation}
+                                <strong>${facture.bonCommande.proforma.article.designation}</strong>
+                                <br/>Code: ${facture.bonCommande.proforma.article.code}
                             </c:if>
                         </span>
                     </div>
@@ -112,9 +121,41 @@
                         <span class="label">Fournisseur:</span>
                         <span class="value">
                             <c:if test="${not empty facture.bonCommande.proforma.fournisseur}">
-                                ${facture.bonCommande.proforma.fournisseur.nom}
+                                <strong>${facture.bonCommande.proforma.fournisseur.nom}</strong>
+                                <c:if test="${not empty facture.bonCommande.proforma.fournisseur.email}">
+                                    <br/>Email: ${facture.bonCommande.proforma.fournisseur.email}
+                                </c:if>
+                                <c:if test="${not empty facture.bonCommande.proforma.fournisseur.telephone}">
+                                    <br/>Tél: ${facture.bonCommande.proforma.fournisseur.telephone}
+                                </c:if>
                             </c:if>
                         </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Quantité:</span>
+                        <span class="value" style="font-size: 1.1em; font-weight: bold;">
+                            ${facture.bonCommande.proforma.quantite} unités
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Prix unitaire:</span>
+                        <span class="value">
+                            ${facture.bonCommande.proforma.prixUnitaire} Ar
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Montant total proforma:</span>
+                        <span class="value" style="font-size: 1.1em; font-weight: bold; color: #007bff;">
+                            ${facture.bonCommande.proforma.montantTotal} Ar
+                        </span>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="label">Date proforma:</span>
+                        <span class="value">${facture.bonCommande.proforma.dateProforma}</span>
                     </div>
                 </c:if>
             </c:if>
@@ -132,6 +173,12 @@
             
             <a href="${pageContext.request.contextPath}/factureFournisseur/list" class="btn-action btn-retour">
                 ← Retour à la liste
+            </a> |
+            <a href="${pageContext.request.contextPath}/bc/list" class="btn-action btn-retour">
+                Bons de commande
+            </a> |
+            <a href="${pageContext.request.contextPath}/achat/achat" class="btn-action btn-retour">
+                🏠 Menu achat
             </a>
         </div>
     </c:if>

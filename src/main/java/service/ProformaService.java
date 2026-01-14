@@ -1,13 +1,25 @@
 package service;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import entity.*;
-import repository.*;
-import java.time.LocalDate;
-import java.util.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import entity.Article;
+import entity.Prix;
+import entity.Proforma;
+import repository.ArticleRepository;
+import repository.FournisseurRepository;
+import repository.PrixRepository;
+import repository.ProformaRepository;
 
 @Service
 public class ProformaService {
@@ -155,5 +167,10 @@ public class ProformaService {
                     .ifPresent(proforma::setFournisseur);
             }
         }
+    }
+
+    // Récupérer une proforma par son ID
+    public Optional<Proforma> findById(Integer idProforma) {
+        return proformaRepository.findById(idProforma);
     }
 }

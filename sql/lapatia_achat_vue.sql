@@ -51,3 +51,63 @@ FROM bon_commande bc
 JOIN proforma p ON bc.id_proforma = p.id_proforma
 JOIN fournisseur f ON p.id_fournisseur = f.id_fournisseur
 JOIN article a ON p.id_article = a.id_article;
+
+
+-- Vue pour les factures avec détails
+CREATE VIEW v_facture_fournisseur AS
+SELECT 
+    ff.id_facture,
+    ff.numero_facture,
+    ff.id_bon_commande,
+    ff.montant_total,
+    ff.date_facture,
+    ff.date_echeance,
+    ff.statut as statut_facture,
+    bc.date_commande,
+    bc.statut as statut_bc,
+    vbc.nom_fournisseur,
+    vbc.designation_article,
+    vbc.quantite
+FROM facture_fournisseur ff
+JOIN bon_commande bc ON ff.id_bon_commande = bc.id_bon_commande
+JOIN v_bon_commande vbc ON bc.id_bon_commande = vbc.id_bon_commande;
+
+-- Vue pour les bons de livraison avec détails
+CREATE VIEW v_bon_livraison AS
+SELECT 
+    bl.id_bon_livraison,
+    bl.numero_livraison,
+    bl.id_bon_commande,
+    bl.date_livraison,
+    bl.transporteur,
+    bl.numero_bon_transport,
+    bl.statut as statut_livraison,
+    bc.date_commande,
+    vbc.nom_fournisseur,
+    vbc.designation_article,
+    vbc.quantite,
+    vbc.montant_total
+FROM bon_livraison bl
+JOIN bon_commande bc ON bl.id_bon_commande = bc.id_bon_commande
+JOIN v_bon_commande vbc ON bc.id_bon_commande = vbc.id_bon_commande;
+
+-- Vue pour les bons de réception avec détails
+CREATE VIEW v_bon_reception AS
+SELECT 
+    br.id_bon_reception,
+    br.id_bon_livraison,
+    br.id_article,
+    br.quantite_commandee,
+    br.quantite_recue,
+    br.quantite_non_conforme,
+    br.commentaire,
+    br.date_reception,
+    br.id_receptionnaire,
+    a.code as code_article,
+    a.designation as designation_article,
+    bl.numero_livraison,
+    bl.statut as statut_livraison,
+    (br.quantite_recue - br.quantite_non_conforme) as quantite_conforme
+FROM bon_reception br
+JOIN article a ON br.id_article = a.id_article
+JOIN bon_livraison bl ON br.id_bon_livraison = bl.id_bon_livraison;

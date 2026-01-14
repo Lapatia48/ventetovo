@@ -8,6 +8,12 @@
 </head>
 <body>
     <p><a href="${pageContext.request.contextPath}/achat/demandes">Voir toutes les demandes</a></p>
+    <p><a href="${pageContext.request.contextPath}/bc/list">Liste des bons de commande</a></p>
+    <p><a href="${pageContext.request.contextPath}/factureFournisseur/list">Liste des factures fournisseurs</a></p>
+    <p><a href="${pageContext.request.contextPath}/bonLivraison/list">Bons de livraison</a></p>
+    
+
+
     <h2>Liste des articles</h2>
     
     <table border="1">

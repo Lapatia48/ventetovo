@@ -77,3 +77,47 @@ CREATE TABLE bon_commande (
     
     FOREIGN KEY (id_proforma) REFERENCES proforma(id_proforma)
 );
+
+
+-- Table Facture Fournisseur
+CREATE TABLE facture_fournisseur (
+    id_facture SERIAL PRIMARY KEY,
+    numero_facture VARCHAR(50) UNIQUE NOT NULL,
+    id_bon_commande INT NOT NULL,
+    montant_total NUMERIC(15,2) NOT NULL,
+    date_facture DATE NOT NULL,
+    date_echeance DATE,
+    statut VARCHAR(20) DEFAULT 'EN_ATTENTE' CHECK (statut IN ('EN_ATTENTE', 'REGLEE', 'EN_RETARD', 'ANNULEE')),
+    
+    FOREIGN KEY (id_bon_commande) REFERENCES bon_commande(id_bon_commande)
+);
+
+-- Table Bon de Livraison
+CREATE TABLE bon_livraison (
+    id_bon_livraison SERIAL PRIMARY KEY,
+    numero_livraison VARCHAR(50) UNIQUE NOT NULL,
+    id_bon_commande INT NOT NULL,
+    date_livraison DATE NOT NULL,
+    transporteur VARCHAR(100),
+    numero_bon_transport VARCHAR(50),
+    statut VARCHAR(20) DEFAULT 'EN_ATTENTE' CHECK (statut IN ('EN_ATTENTE', 'RECU', 'PARTIEL', 'ANNULE')),
+    
+    FOREIGN KEY (id_bon_commande) REFERENCES bon_commande(id_bon_commande)
+);
+
+-- Table Bon de Réception (lignes de livraison)
+CREATE TABLE bon_reception (
+    id_bon_reception SERIAL PRIMARY KEY,
+    id_bon_livraison INT NOT NULL,
+    id_article INT NOT NULL,
+    quantite_commandee INT NOT NULL,
+    quantite_recue INT NOT NULL,
+    quantite_non_conforme INT DEFAULT 0,
+    commentaire TEXT,
+    date_reception TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id_receptionnaire INT,
+    
+    FOREIGN KEY (id_bon_livraison) REFERENCES bon_livraison(id_bon_livraison) ON DELETE CASCADE,
+    FOREIGN KEY (id_article) REFERENCES article(id_article),
+    FOREIGN KEY (id_receptionnaire) REFERENCES utilisateur(id_utilisateur)
+);

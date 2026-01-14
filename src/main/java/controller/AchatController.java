@@ -11,15 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import entity.BonLivraison;
+import entity.FactureFournisseur;
 import entity.Proforma;
 import entity.Utilisateur;
 import entity.VBonCommande;
 import jakarta.servlet.http.HttpSession;
-import service.AchatFinanceService;
-import service.ArticleService;
-import service.BonCommandeService;
-import service.ProformaService;
-import service.VBonCommandeService;
+import service.*;
 
 @Controller
 public class AchatController {
@@ -38,6 +36,12 @@ public class AchatController {
 
     @Autowired
     private VBonCommandeService vBonCommandeService;
+
+    @Autowired
+    private FactureFournisseurService factureFournisseurService;
+
+    @Autowired
+    private BonLivraisonService bonLivraisonService;
 
     @GetMapping("/achat/achat")
     public String achat(Model model) {
@@ -194,5 +198,116 @@ public class AchatController {
         VBonCommande bonCommande = vBonCommandeService.findById(idBonCommande);
         model.addAttribute("bonCommande", bonCommande);
         return "achat/bc-detail";
+    }
+
+     // Générer une facture pour un bon de commande
+    @PostMapping("/genererFactureFournisseur")
+    public String genererFactureFournisseur(@RequestParam("idBonCommande") Integer idBonCommande,
+                                          HttpSession session,
+                                          Model model) {
+        
+        // Vérifier si l'utilisateur est connecté
+        Utilisateur utilisateurConnecte = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateurConnecte == null) {
+            model.addAttribute("error", "Vous devez être connecté.");
+            return "redirect:/user/login";
+        }
+        
+        // Vérifier si une facture existe déjà
+        Optional<FactureFournisseur> factureExistante = factureFournisseurService.findByIdBonCommande(idBonCommande);
+        if (factureExistante.isPresent()) {
+            model.addAttribute("info", "Une facture existe déjà pour ce bon de commande.");
+            return "redirect:/factureFournisseur/list";
+        }
+        
+        // Récupérer le montant du bon de commande
+        VBonCommande bonCommande = vBonCommandeService.findById(idBonCommande);
+        if (bonCommande == null) {
+            model.addAttribute("error", "Bon de commande introuvable.");
+            return "redirect:/bc/list";
+        }
+        
+        // Créer la facture
+        FactureFournisseur facture = factureFournisseurService.creerFactureFromBonCommande(
+            idBonCommande, 
+            bonCommande.getMontantTotal()
+        );
+        
+        model.addAttribute("success", "Facture générée avec succès: " + facture.getNumeroFacture());
+        return "redirect:/factureFournisseur/list";
+    }
+
+    // Liste des factures fournisseurs
+    @GetMapping("/factureFournisseur/list")
+    public String listeFacturesFournisseurs(Model model) {
+        List<FactureFournisseur> factures = factureFournisseurService.findAll();
+        model.addAttribute("factures", factures);
+        return "achat/facturefournisseur-list";
+    }
+
+    // Détail d'une facture
+    @GetMapping("/factureFournisseur/detail/{id}")
+    public String detailFacture(@PathVariable("id") Integer idFacture, Model model) {
+        Optional<FactureFournisseur> factureOpt = factureFournisseurService.findById(idFacture);
+        if (factureOpt.isPresent()) {
+            model.addAttribute("facture", factureOpt.get());
+            return "achat/facturefournisseur-detail";
+        } else {
+            model.addAttribute("error", "Facture introuvable.");
+            return "redirect:/factureFournisseur/list";
+        }
+    }
+
+
+    // Régler une facture et créer un bon de livraison
+    @PostMapping("/factureFournisseur/regler")
+    public String reglerFactureEtCreerLivraison(@RequestParam("idFacture") Integer idFacture,
+                                            HttpSession session,
+                                            Model model) {
+        
+        Utilisateur utilisateurConnecte = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateurConnecte == null) {
+            model.addAttribute("error", "Vous devez être connecté.");
+            return "redirect:/user/login";
+        }
+        
+        // 1. Marquer la facture comme réglée
+        factureFournisseurService.marquerCommeReglee(idFacture);
+        
+        // 2. Récupérer la facture pour obtenir l'ID du bon de commande
+        Optional<FactureFournisseur> factureOpt = factureFournisseurService.findById(idFacture);
+        if (factureOpt.isPresent()) {
+            FactureFournisseur facture = factureOpt.get();
+            
+            // 3. Créer un bon de livraison pour ce bon de commande
+            bonLivraisonService.creerBonLivraisonFromBonCommande(facture.getIdBonCommande());
+            
+            model.addAttribute("success", "Facture réglée et bon de livraison créé.");
+        } else {
+            model.addAttribute("error", "Facture introuvable.");
+        }
+        
+        return "redirect:/bonLivraison/list";
+    }
+
+    // Liste des bons de livraison
+    @GetMapping("/bonLivraison/list")
+    public String listeBonLivraisons(Model model) {
+        List<BonLivraison> bonLivraisons = bonLivraisonService.findAll();
+        model.addAttribute("bonLivraisons", bonLivraisons);
+        return "achat/bonlivraison-list";
+    }
+
+    // Détail d'un bon de livraison
+    @GetMapping("/bonLivraison/detail/{id}")
+    public String detailBonLivraison(@PathVariable("id") Integer idBonLivraison, Model model) {
+        Optional<BonLivraison> bonLivraisonOpt = bonLivraisonService.findById(idBonLivraison);
+        if (bonLivraisonOpt.isPresent()) {
+            model.addAttribute("bonLivraison", bonLivraisonOpt.get());
+            return "achat/bonlivraison-detail";
+        } else {
+            model.addAttribute("error", "Bon de livraison introuvable.");
+            return "redirect:/bonLivraison/list";
+        }
     }
 }

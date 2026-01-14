@@ -112,6 +112,11 @@
             </div>
         </div>
         
+        <form action="${pageContext.request.contextPath}/genererFactureFournisseur" method="post">
+            <input type="hidden" name="idBonCommande" value="${bonCommande.idBonCommande}">
+            <button type="submit">Générer facture fournisseur</button>
+        </form>
+        
         <br>
         <a href="${pageContext.request.contextPath}/bc/list"> Retour à la liste</a>
         &nbsp;&nbsp;

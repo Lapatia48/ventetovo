@@ -4,7 +4,7 @@ A Spring MVC web application project.
 
 ## Prerequisites
 
-- Java 11 or higher
+- Java 17 or higher
 - Maven 3.6+
 - Git (optional, for cloning the repository)
 

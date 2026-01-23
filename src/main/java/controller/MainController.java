@@ -9,8 +9,7 @@ public class MainController {
 
     @GetMapping("/entrer")
     public String entrer(){
-        return "index";
+        return "login_stock";
     }
-
 
 }

@@ -420,9 +420,9 @@ public class VentesController {
 
     @PostMapping("/commandes/creer")
     public String creerCommande(@RequestParam Integer idDevis,
-                               @RequestParam(required = false) String dateLivraison,
-                               HttpSession session,
-                               RedirectAttributes redirectAttributes) {
+                            @RequestParam(required = false) String dateLivraison,
+                            HttpSession session,
+                            RedirectAttributes redirectAttributes) {
 
         VUtilisateurRole user = getUser(session);
         if (user == null || user.getNomRole() == null) {
@@ -431,22 +431,29 @@ public class VentesController {
         }
 
         try {
-            LocalDateTime dateLivraisonSouhaitee = LocalDateTime.now().plusDays(7); // Par défaut 7 jours
+            LocalDateTime dateLivraisonSouhaitee = LocalDateTime.now().plusDays(7);
             if (dateLivraison != null && !dateLivraison.isBlank()) {
                 LocalDate date = LocalDate.parse(dateLivraison);
                 dateLivraisonSouhaitee = date.atStartOfDay();
             }
 
-            commandeClientService.creerCommandeDepuisDevis(idDevis, dateLivraisonSouhaitee);
-            redirectAttributes.addFlashAttribute("message", "Commande créée avec succès");
+            // ⚠️ Création en A_VALIDER (pas encore validée)
+            commandeClientService.creerCommandeDepuisDevis(
+                    idDevis,
+                    dateLivraisonSouhaitee
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "Commande créée et envoyée pour validation.");
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/vente/commandes/nouveau?idDevis=" + idDevis;
         }
 
-        return "redirect:/vente/livraisons";
+        return "redirect:/vente/commandes";
     }
+
 
     @GetMapping("/livraisons")
     public String listeCommandesALivrer(Model model, HttpSession session) {
@@ -471,6 +478,78 @@ public class VentesController {
         model.addAttribute("utilisateur", user);
         return "vente/liste_commandes_livraison";
     }
+
+    @PostMapping("/commandes/valider")
+    public String validerCommande(@RequestParam Integer idCommande,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            Utilisateur u = new Utilisateur();
+            u.setIdUtilisateur(user.getIdUtilisateur());
+            u.setIdRole(user.getIdRole());
+
+            commandeClientService.validerCommande(idCommande, u);
+            redirectAttributes.addFlashAttribute("message", "Commande validée avec succès");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/commandes/a-valider";
+    }
+
+    @PostMapping("/commandes/refuser")
+    public String refuserCommande(@RequestParam Integer idCommande,
+                                @RequestParam String motif,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            Utilisateur u = new Utilisateur();
+            u.setIdUtilisateur(user.getIdUtilisateur());
+            u.setIdRole(user.getIdRole());
+
+            commandeClientService.refuserCommande(idCommande, u, motif);
+            redirectAttributes.addFlashAttribute("message", "Commande refusée");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/commandes/a-valider";
+    }
+
+
+    @GetMapping("/commandes/a-valider")
+    public String commandesAValider(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null || user.getNomRole() == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        List<CommandeClient> commandes =
+                commandeClientService.findByStatut("A_VALIDER");
+
+        model.addAttribute("commandes", commandes);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_commandes_validation";
+    }
+
 
 
     @GetMapping("/livraisons/nouveau")

@@ -70,6 +70,7 @@
              <a href="${pageContext.request.contextPath}/vente/devis">Gestion Devis</a> 
             <a href="${pageContext.request.contextPath}/vente/commandes">Gestion Commandes</a>
             <a href="${pageContext.request.contextPath}/vente/livraisons">Gestion Livraisons</a>
+            <a href="${pageContext.request.contextPath}/vente/commandes/a-valider">Validation Commandes</a>
             <!-- <a href="${pageContext.request.contextPath}/vente/clients">Gestion Clients</a> -->
         </div>
         

@@ -52,17 +52,32 @@ CREATE TABLE ligne_devis (
 CREATE TABLE commande_client (
     id_commande SERIAL PRIMARY KEY,
     numero_commande VARCHAR(50) UNIQUE NOT NULL,
+
     id_devis INT REFERENCES devis(id_devis),
     id_client INT NOT NULL REFERENCES client(id_client),
+
     date_commande TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_livraison_souhaitee DATE,
-    statut VARCHAR(20) DEFAULT 'EN_ATTENTE' 
-        CHECK (statut IN ('EN_ATTENTE', 'CONFIRMEE', 'EN_PREPARATION', 
-                         'PARTIELLEMENT_LIVREE', 'LIVREE', 'ANNULEE')),
+
+    statut VARCHAR(20) DEFAULT 'A_VALIDER'
+        CHECK (statut IN (
+            'A_VALIDER',
+            'VALIDEE',
+            'EN_PREPARATION',
+            'PARTIELLEMENT_LIVREE',
+            'LIVREE',
+            'ANNULEE'
+        )),
+
     montant_total_ht NUMERIC(15,2) DEFAULT 0,
     montant_total_ttc NUMERIC(15,2) DEFAULT 0,
-    id_commercial INT REFERENCES utilisateur(id_utilisateur)
+
+    id_commercial INT REFERENCES utilisateur(id_utilisateur),
+
+    id_validateur INT REFERENCES utilisateur(id_utilisateur),
+    date_validation TIMESTAMP
 );
+
 
 -- Ligne commande client
 CREATE TABLE ligne_commande_client (

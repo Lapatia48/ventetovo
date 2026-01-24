@@ -41,6 +41,27 @@ public class CommandeClient {
     @Column(name = "id_commercial")
     private Integer idCommercial;
 
+    @Column(name = "id_validateur")
+    private Integer idValidateur;
+
+    
+    @Column(name = "date_validation")
+    private LocalDateTime dateValidation;
+
+    public Integer getIdValidateur() {
+        return idValidateur;
+    }
+    public void setIdValidateur(Integer idValidateur) {
+        this.idValidateur = idValidateur;
+    }
+    public LocalDateTime getDateValidation() {
+        return dateValidation;
+    }
+    public void setDateValidation(LocalDateTime dateValidation) {
+        this.dateValidation = dateValidation;
+    }
+
+
     // Getters / Setters
     public Integer getIdCommande() { return idCommande; }
     public void setIdCommande(Integer idCommande) { this.idCommande = idCommande; }

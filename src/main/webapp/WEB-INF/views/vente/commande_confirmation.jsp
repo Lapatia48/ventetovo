@@ -24,7 +24,8 @@
 </form>
 
 <br>
-<a href="${pageContext.request.contextPath}/vente/commandes">← Annuler</a>
+<a href="${pageContext.request.contextPath}/vente/commandes/a-valider">← Retour validation</a>
+
 
 </body>
 </html>

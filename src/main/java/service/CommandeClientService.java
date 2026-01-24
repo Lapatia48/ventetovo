@@ -4,6 +4,8 @@ import entity.CommandeClient;
 import entity.Devis;
 import entity.LigneCommandeClient;
 import entity.LigneDevis;
+import entity.Utilisateur;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +64,9 @@ public class CommandeClientService {
         commande.setIdClient(devis.getIdClient());
         commande.setDateCommande(LocalDateTime.now());
         commande.setDateLivraisonSouhaitee(dateLivraisonSouhaitee.toLocalDate());
-        commande.setStatut("CONFIRMEE");
+        commande.setStatut("A_VALIDER");
+        commande.setIdValidateur(null);
+        commande.setDateValidation(null);
         commande.setMontantTotalHt(devis.getMontantTotalHt());
         commande.setMontantTotalTtc(devis.getMontantTtc());
         commande.setIdCommercial(devis.getIdCommercial());
@@ -103,14 +107,78 @@ public class CommandeClientService {
     }
 
     public List<CommandeClient> findLivrables() {
-    return commandeClientRepository.findAll()
-            .stream()
-            .filter(c ->
-                    "CONFIRMEE".equals(c.getStatut()) ||
-                    "EN_PREPARATION".equals(c.getStatut()) ||
-                    "PARTIELLEMENT_LIVREE".equals(c.getStatut())
-            )
-            .toList();
-}
+        return commandeClientRepository.findAll()
+                .stream()
+                .filter(c ->
+                        "VALIDEE".equals(c.getStatut()) ||
+                        "EN_PREPARATION".equals(c.getStatut()) ||
+                        "PARTIELLEMENT_LIVREE".equals(c.getStatut())
+                )
+                .toList();  
+    }
+
+
+    @Transactional
+    public void validerCommande(Integer idCommande, Utilisateur validateur) {
+
+        CommandeClient commande = commandeClientRepository.findById(idCommande)
+                .orElseThrow(() -> new RuntimeException("Commande introuvable"));
+
+        if (!"A_VALIDER".equals(commande.getStatut())) {
+            throw new RuntimeException("Seules les commandes à valider peuvent être validées.");
+        }
+
+        // Charger rôle
+        // ⚠️ à adapter selon votre logique
+        // enrichirAvecRole(validateur);
+
+        Integer roleId = validateur.getIdRole();
+
+        // Exemple :
+        // 1 = ADMIN
+        // 6 = RESPONSABLE_VENTES
+        if (roleId != 1 && roleId != 6) {
+            throw new RuntimeException("Vous n'avez pas le droit de valider cette commande.");
+        }
+
+        commande.setStatut("VALIDEE");
+        commande.setIdValidateur(validateur.getIdUtilisateur());
+        commande.setDateValidation(LocalDateTime.now());
+
+        commandeClientRepository.save(commande);
+    }
+
+    public List<CommandeClient> findByStatut(String statut) {
+        return commandeClientRepository.findByStatut(statut);
+    }
+
+    @Transactional
+    public void refuserCommande(Integer idCommande, Utilisateur validateur, String motif) {
+
+        CommandeClient commande = commandeClientRepository.findById(idCommande)
+                .orElseThrow(() -> new RuntimeException("Commande introuvable"));
+
+        if (!"A_VALIDER".equals(commande.getStatut())) {
+            throw new RuntimeException("Seules les commandes à valider peuvent être refusées.");
+        }
+
+        Integer roleId = validateur.getIdRole();
+
+        if (roleId != 1 && roleId != 6) {
+            throw new RuntimeException("Vous n'avez pas le droit de refuser cette commande.");
+        }
+
+        commande.setStatut("ANNULEE");   // ou REFUSEE selon votre choix métier
+        commande.setIdValidateur(validateur.getIdUtilisateur());
+        commande.setDateValidation(LocalDateTime.now());
+
+        commandeClientRepository.save(commande);
+
+        // Plus tard : stocker le motif dans une table d'audit
+    }
+
+
+
+
 
 }

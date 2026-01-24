@@ -150,159 +150,159 @@
         }
     </style>
 </head>
-<body>
-    <div class="app-container">
-        <!-- SIDEBAR -->
-        <%@ include file="../achat/sidebar.jsp" %>
-        <!-- MAIN CONTENT -->
-        <main class="main-content">
-            <header class="main-header">
-                <div class="header-content">
-                    <h1 class="page-title">Module d'Achat</h1>
-                    <div class="header-actions">
-                        <div class="breadcrumb">
-                            <span>Demandes d'achat</span> / <span>Toutes</span>
-                        </div>
-                    </div>
-                </div>
-            </header>
-            
-            <div class="content-wrapper">
-                <div class="content-header">
-                    <h2>Toutes les demandes d'achat</h2>
-                </div>
-                
-                <!-- STATISTICS -->
-                <div class="stats-container">
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-number">${not empty demandes ? demandes.size() : 0}</div>
-                            <div class="stat-label">Demandes totales</div>
-                        </div>
-                        <c:set var="totalProformas" value="0" />
-                        <c:forEach var="demande" items="${demandes}">
-                            <c:set var="proformas" value="${demande.value}" />
-                            <c:if test="${not empty proformas}">
-                                <c:set var="totalProformas" value="${totalProformas + proformas.size()}" />
-                            </c:if>
-                        </c:forEach>
-                        <div class="stat-item">
-                            <div class="stat-number">${totalProformas}</div>
-                            <div class="stat-label">Proformas reçus</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">
-                                <c:set var="demandesAvecProformas" value="0" />
-                                <c:forEach var="demande" items="${demandes}">
-                                    <c:set var="proformas" value="${demande.value}" />
-                                    <c:if test="${not empty proformas && proformas.size() > 0}">
-                                        <c:set var="demandesAvecProformas" value="${demandesAvecProformas + 1}" />
-                                    </c:if>
-                                </c:forEach>
-                                ${demandesAvecProformas}
+    <body>
+        <div class="app-container">
+            <!-- SIDEBAR -->
+            <%@ include file="../achat/sidebar.jsp" %>
+            <!-- MAIN CONTENT -->
+            <main class="main-content">
+                <header class="main-header">
+                    <div class="header-content">
+                        <h1 class="page-title">Module d'Achat</h1>
+                        <div class="header-actions">
+                            <div class="breadcrumb">
+                                <span>Demandes d'achat</span> / <span>Toutes</span>
                             </div>
-                            <div class="stat-label">Demandes actives</div>
                         </div>
                     </div>
-                </div>
+                </header>
                 
-                <!-- FILTER -->
-                <div class="filter-container">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="searchDemandes" placeholder="Rechercher par article, code ou quantité..." class="search-input">
+                <div class="content-wrapper">
+                    <div class="content-header">
+                        <h2>Toutes les demandes d'achat</h2>
                     </div>
-                </div>
-                
-                <!-- DEMANDES LIST -->
-                <c:choose>
-                    <c:when test="${not empty demandes}">
-                        <div class="demandes-grid" id="demandesList">
-                            <c:forEach var="demande" items="${demandes}" varStatus="loop">
+                    
+                    <!-- STATISTICS -->
+                    <div class="stats-container">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">${not empty demandes ? demandes.size() : 0}</div>
+                                <div class="stat-label">Demandes totales</div>
+                            </div>
+                            <c:set var="totalProformas" value="0" />
+                            <c:forEach var="demande" items="${demandes}">
                                 <c:set var="proformas" value="${demande.value}" />
                                 <c:if test="${not empty proformas}">
-                                    <div class="demande-card" data-search="${proformas[0].article.code} ${proformas[0].article.designation} ${proformas[0].quantite}">
-                                        <div class="demande-header">
-                                            <h3>
-                                                Demande #${loop.index + 1}
-                                                <span class="demande-token">${proformas[0].tokenDemande}</span>
-                                            </h3>
-                                        </div>
-                                        
-                                        <div class="demande-body">
-                                            <div class="demande-info">
-                                                <span class="demande-label">Article</span>
-                                                <span class="demande-value">
-                                                    <c:if test="${not empty proformas[0].article}">
-                                                        <span class="article-code">${proformas[0].article.code}</span>
-                                                        ${proformas[0].article.designation}
-                                                    </c:if>
-                                                </span>
-                                            </div>
-                                            
-                                            <div class="demande-info">
-                                                <span class="demande-label">Quantité demandée</span>
-                                                <span class="demande-value">
-                                                    <strong style="color: var(--primary-color); font-size: 1.1rem;">${proformas[0].quantite}</strong> unités
-                                                </span>
-                                            </div>
-                                            
-                                            <div class="demande-info">
-                                                <span class="demande-label">Date création</span>
-                                                <span class="demande-value">
-                                                    <c:if test="${not empty proformas[0].dateCreation}">
-                                                        ${proformas[0].dateCreation}
-                                                    </c:if>
-                                                </span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="demande-footer">
-                                            <div class="proforma-count">
-                                                <i class="fas fa-file-invoice"></i>
-                                                ${proformas.size()} proforma(s)
-                                            </div>
-                                            <a href="${pageContext.request.contextPath}/achat/proformas?token=${proformas[0].tokenDemande}" 
-                                               class="btn-action">
-                                                <i class="fas fa-eye"></i>
-                                                Voir les proformas
-                                            </a>
-                                        </div>
-                                    </div>
+                                    <c:set var="totalProformas" value="${totalProformas + proformas.size()}" />
                                 </c:if>
                             </c:forEach>
+                            <div class="stat-item">
+                                <div class="stat-number">${totalProformas}</div>
+                                <div class="stat-label">Proformas reçus</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">
+                                    <c:set var="demandesAvecProformas" value="0" />
+                                    <c:forEach var="demande" items="${demandes}">
+                                        <c:set var="proformas" value="${demande.value}" />
+                                        <c:if test="${not empty proformas && proformas.size() > 0}">
+                                            <c:set var="demandesAvecProformas" value="${demandesAvecProformas + 1}" />
+                                        </c:if>
+                                    </c:forEach>
+                                    ${demandesAvecProformas}
+                                </div>
+                                <div class="stat-label">Demandes actives</div>
+                            </div>
                         </div>
-                    </c:when>
+                    </div>
                     
-                    <c:otherwise>
-                        <div class="empty-state">
-                            <i class="fas fa-clipboard-list"></i>
-                            <h3>Aucune demande d'achat</h3>
-                            <p>Il n'y a actuellement aucune demande d'achat dans le système. Créez une nouvelle demande pour commencer le processus d'achat.</p>
-                            <a href="${pageContext.request.contextPath}/achat/achat" class="btn-create">
-                                <i class="fas fa-plus"></i>
+                    <!-- FILTER -->
+                    <div class="filter-container">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" id="searchDemandes" placeholder="Rechercher par article, code ou quantité..." class="search-input">
+                        </div>
+                    </div>
+                    
+                    <!-- DEMANDES LIST -->
+                    <c:choose>
+                        <c:when test="${not empty demandes}">
+                            <div class="demandes-grid" id="demandesList">
+                                <c:forEach var="demande" items="${demandes}" varStatus="loop">
+                                    <c:set var="proformas" value="${demande.value}" />
+                                    <c:if test="${not empty proformas}">
+                                        <div class="demande-card" data-search="${proformas[0].article.code} ${proformas[0].article.designation} ${proformas[0].quantite}">
+                                            <div class="demande-header">
+                                                <h3>
+                                                    Demande #${loop.index + 1}
+                                                    <span class="demande-token">${proformas[0].tokenDemande}</span>
+                                                </h3>
+                                            </div>
+                                            
+                                            <div class="demande-body">
+                                                <div class="demande-info">
+                                                    <span class="demande-label">Article</span>
+                                                    <span class="demande-value">
+                                                        <c:if test="${not empty proformas[0].article}">
+                                                            <span class="article-code">${proformas[0].article.code}</span>
+                                                            ${proformas[0].article.designation}
+                                                        </c:if>
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="demande-info">
+                                                    <span class="demande-label">Quantité demandée</span>
+                                                    <span class="demande-value">
+                                                        <strong style="color: var(--primary-color); font-size: 1.1rem;">${proformas[0].quantite}</strong> unités
+                                                    </span>
+                                                </div>
+                                                
+                                                <div class="demande-info">
+                                                    <span class="demande-label">Date création</span>
+                                                    <span class="demande-value">
+                                                        <c:if test="${not empty proformas[0].dateCreation}">
+                                                            ${proformas[0].dateCreation}
+                                                        </c:if>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="demande-footer">
+                                                <div class="proforma-count">
+                                                    <i class="fas fa-file-invoice"></i>
+                                                    ${proformas.size()} proforma(s)
+                                                </div>
+                                                <a href="${pageContext.request.contextPath}/achat/proformas?token=${proformas[0].tokenDemande}" 
+                                                class="btn-action">
+                                                    <i class="fas fa-eye"></i>
+                                                    Voir les proformas
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
+                            </div>
+                        </c:when>
+                        
+                        <c:otherwise>
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3>Aucune demande d'achat</h3>
+                                <p>Il n'y a actuellement aucune demande d'achat dans le système. Créez une nouvelle demande pour commencer le processus d'achat.</p>
+                                <a href="${pageContext.request.contextPath}/achat/achat" class="btn-create">
+                                    <i class="fas fa-plus"></i>
+                                    Nouvelle demande
+                                </a>
+                            </div>
+                        </c:otherwise>
+                    </c:choose>
+                    
+                    <!-- NAVIGATION -->
+                    <div class="navigation-footer">
+                        <div class="nav-links">
+                            <a href="${pageContext.request.contextPath}/achat/achat" class="nav-link-page">
+                                <i class="fas fa-plus-circle"></i>
                                 Nouvelle demande
                             </a>
+                            <a href="${pageContext.request.contextPath}/bc/list" class="nav-link-page">
+                                <i class="fas fa-list"></i>
+                                Voir les bons de commande
+                            </a>
                         </div>
-                    </c:otherwise>
-                </c:choose>
-                
-                <!-- NAVIGATION -->
-                <div class="navigation-footer">
-                    <div class="nav-links">
-                        <a href="${pageContext.request.contextPath}/achat/achat" class="nav-link-page">
-                            <i class="fas fa-plus-circle"></i>
-                            Nouvelle demande
-                        </a>
-                        <a href="${pageContext.request.contextPath}/bc/list" class="nav-link-page">
-                            <i class="fas fa-list"></i>
-                            Voir les bons de commande
-                        </a>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
+            </main>
+        </div>
     
     <script>
         // Script de recherche

@@ -3,7 +3,13 @@ INSERT INTO role (id_role, nom_role, niveau_validation) VALUES
 (1, 'ADMIN', 0),
 (2, 'MAGASINIER', 0),
 (3, 'VALIDEUR_N1', 1),
-(4, 'VALIDEUR_N2', 2);
+(4, 'VALIDEUR_N2', 2),
+(5, 'COMMERCIAL', 0);
+
+-- 1b. Créer au moins un commercial pour le module ventes
+INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, id_role, actif) VALUES
+('Rabe', 'Jean', 'commercial@vente.com', 'mdp123', 5, true)
+ON CONFLICT (email) DO NOTHING;
 
 -- 2. Insertion des utilisateurs
 INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, id_role, actif) VALUES

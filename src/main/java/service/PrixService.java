@@ -63,6 +63,16 @@ public class PrixService {
         }
         return Optional.empty();
     }
+
+    public Optional<Prix> findDernierPrixVente(Integer idArticle) {
+        List<Prix> prixList = prixRepository.findDernierPrixByArticleAndType(idArticle, "VENTE");
+        if (!prixList.isEmpty()) {
+            Prix prix = prixList.get(0);
+            enrichirPrix(prix);
+            return Optional.of(prix);
+        }
+        return Optional.empty();
+    }
     
     public Prix save(Prix prix) {
         if (prix.getDatePrix() == null) {

@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import entity.Utilisateur;
+import entity.VUtilisateurRole;
 import jakarta.servlet.http.HttpSession;
+import repository.VUtilisateurRoleRepository;
 import service.ArticleService;
 import service.UtilisateurService;
 
@@ -25,53 +27,63 @@ public class UtilisateurController {
     @Autowired
     private ArticleService articleService;
 
+    @Autowired
+    private VUtilisateurRoleRepository vUtilisateurRoleRepository;
+
     @GetMapping("/user/accueil")
-    public String accueil(){
+    public String accueil() {
         return "accueil";
     }
 
     @GetMapping("/user/login")
-    public String login(@RequestParam("id") int id, Model model){
-        List<String> emails = utilisateurService.findByActifTrue().stream()
+    public String showLogin(@RequestParam("id") int id, Model model) {
+
+        List<String> emails = utilisateurService.findByActifTrue()
+                .stream()
                 .map(Utilisateur::getEmail)
                 .collect(Collectors.toList());
+
         model.addAttribute("emails", emails);
         model.addAttribute("id", id);
+
         return "user/login";
     }
 
     @PostMapping("/user/login")
-    public String login(@RequestParam("email") String email,
-                        @RequestParam("motDePasse") String motDePasse,
-                        @RequestParam("id") int id,
+    public String login(@RequestParam String email,
+                        @RequestParam String motDePasse,
+                        @RequestParam int id,
                         Model model,
                         HttpSession session) {
-        Optional<Utilisateur> userOpt = utilisateurService.findByEmail(email);
-        if (userOpt.isPresent()) {
-            Utilisateur user = userOpt.get();
-            if (user.getActif() != null && user.getActif() && user.getMotDePasse().equals(motDePasse) && id==0) {
-                // Login successful
-                session.setAttribute("utilisateur", user);
-                return "redirect:/achat/achat";
-            }
 
-            if (user.getActif() != null && user.getActif() && user.getMotDePasse().equals(motDePasse) && id==1) {
-                // Login successful
-                session.setAttribute("utilisateur", user);
-                return "redirect:/vente/accueil";
-            }
+        Optional<VUtilisateurRole> opt =
+                vUtilisateurRoleRepository.findByEmail(email);
+
+        if (opt.isEmpty()) {
+            model.addAttribute("error", "Utilisateur introuvable");
+            return "user/login";
         }
-        model.addAttribute("error", "Email ou mot de passe incorrect, ou utilisateur inactif.");
+
+        VUtilisateurRole user = opt.get();
+
+        if (!Boolean.TRUE.equals(user.getActif()) ||
+            !user.getMotDePasse().equals(motDePasse)) {
+            model.addAttribute("error", "Identifiants incorrects");
+            return "user/login";
+        }
+
+        session.setAttribute("utilisateur", user);
+
+        if (id == 0) return "redirect:/achat/achat";
+        if (id == 1) return "redirect:/vente/accueil";
+
         return "user/login";
     }
+
 
     @GetMapping("/user/logout")
     public String logout(HttpSession session) {
         session.invalidate();
         return "accueil";
     }
-
-
-
-   
 }

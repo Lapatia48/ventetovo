@@ -305,10 +305,12 @@ public class VentesController {
         }
 
         List<Devis> devisList = devisService.findAll();
+
         model.addAttribute("devisList", devisList);
-        model.addAttribute("utilisateur", user);
+        model.addAttribute("utilisateur", user);   // 👈 IMPORTANT pour la JSP
         return "vente/liste_devis";
     }
+
 
     @PostMapping("/devis/valider")
     public String validerDevis(@RequestParam Integer idDevis,

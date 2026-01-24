@@ -14,16 +14,24 @@ CREATE TABLE devis (
     id_devis SERIAL PRIMARY KEY,
     numero_devis VARCHAR(50) UNIQUE NOT NULL,
     id_client INT NOT NULL REFERENCES client(id_client),
+
+    id_validateur INT REFERENCES utilisateur(id_utilisateur),
+    date_validation TIMESTAMP,
+
     date_devis TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     date_validite DATE,
-    statut VARCHAR(20) DEFAULT 'BROUILLON' 
-        CHECK (statut IN ('BROUILLON', 'ENVOYE', 'ACCEPTE', 'REFUSE', 'EXPIRE')),
+
+    statut VARCHAR(20) DEFAULT 'A_VALIDER'
+        CHECK (statut IN ('A_VALIDER', 'ACCEPTE', 'REFUSE', 'ENVOYE', 'EXPIRE')),
+
     montant_total_ht NUMERIC(15,2) DEFAULT 0,
     montant_tva NUMERIC(15,2) DEFAULT 0,
     montant_ttc NUMERIC(15,2) DEFAULT 0,
+
     id_commercial INT NOT NULL REFERENCES utilisateur(id_utilisateur),
     notes TEXT
 );
+
 
 -- Ligne devis (PLUSIEURS lignes par devis)
 CREATE TABLE ligne_devis (

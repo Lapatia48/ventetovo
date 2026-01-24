@@ -47,38 +47,69 @@
         <th>Client</th>
         <th>Statut</th>
         <th>Total TTC</th>
+        <th>Validateur</th>
+        <th>Date validation</th>
         <th>Actions</th>
     </tr>
 
     <c:forEach var="devis" items="${devisList}">
         <tr>
             <td>${devis.idDevis}</td>
-            <td>${empty devis.numeroDevis ? 'N/A' : devis.numeroDevis}</td>
+            <td>${devis.numeroDevis}</td>
             <td>${devis.idClient}</td>
-            <td>${empty devis.statut ? 'N/A' : devis.statut}</td>
+            <td>${devis.statut}</td>
             <td>${devis.montantTtc}</td>
+
+            <!-- Validateur -->
+            <td>
+                <c:choose>
+                    <c:when test="${not empty devis.idValidateur}">
+                        ${devis.idValidateur}
+                    </c:when>
+                    <c:otherwise>
+                        -
+                    </c:otherwise>
+                </c:choose>
+            </td>
+
+            <!-- Date validation -->
+            <td>
+                <c:choose>
+                    <c:when test="${not empty devis.dateValidation}">
+                        ${devis.dateValidation}
+                    </c:when>
+                    <c:otherwise>
+                        -
+                    </c:otherwise>
+                </c:choose>
+            </td>
+
+            <!-- Actions -->
             <td>
 
-                <c:if test="${devis.statut == 'BROUILLON' 
-          || devis.statut == 'A_VALIDER_N1' 
-          || devis.statut == 'A_VALIDER_N2'}">
+                <!-- Validation possible uniquement si A_VALIDER -->
+                <c:if test="${devis.statut == 'A_VALIDER'}">
 
+                    <!-- Rôles autorisés -->
+                    <c:if test="${utilisateur.nomRole == 'ADMIN'
+                               || utilisateur.nomRole == 'VALIDEUR_N1'
+                               || utilisateur.nomRole == 'VALIDEUR_N2'}">
 
-                    <form action="${pageContext.request.contextPath}/vente/devis/valider" method="post">
-                        <input type="hidden" name="idDevis" value="${devis.idDevis}">
-                        <button type="submit">✅ Valider</button>
-                    </form>
+                        <form action="${pageContext.request.contextPath}/vente/devis/valider" method="post" style="display:inline;">
+                            <input type="hidden" name="idDevis" value="${devis.idDevis}">
+                            <button type="submit" class="btn ok">Valider</button>
+                        </form>
 
-                    <form action="${pageContext.request.contextPath}/vente/devis/refuser" method="post">
-                        <input type="hidden" name="idDevis" value="${devis.idDevis}">
-                        <input type="text" name="motif" placeholder="Motif du refus" required>
-                        <button type="submit">❌ Refuser</button>
-                    </form>
+                        <form action="${pageContext.request.contextPath}/vente/devis/refuser" method="post" style="display:inline;">
+                            <input type="hidden" name="idDevis" value="${devis.idDevis}">
+                            <input type="text" name="motif" placeholder="Motif" required>
+                            <button type="submit" class="btn no">Refuser</button>
+                        </form>
 
+                    </c:if>
                 </c:if>
 
-
-                <!-- Créer commande -->
+                <!-- Créer commande uniquement si accepté -->
                 <c:if test="${devis.statut == 'ACCEPTE'}">
                     <a class="btn cmd"
                        href="${pageContext.request.contextPath}/vente/commandes/nouveau?idDevis=${devis.idDevis}">
@@ -89,8 +120,8 @@
             </td>
         </tr>
     </c:forEach>
-
 </table>
+
 
 <br>
 <a href="${pageContext.request.contextPath}/vente/accueil">← Retour accueil</a>

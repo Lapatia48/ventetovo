@@ -100,9 +100,12 @@ public class DevisService {
         devis.setDateDevis(LocalDateTime.now());
         devis.setDateValidite(dateValidite);
         devis.setNotes(notes);
-        devis.setStatut("BROUILLON");
+        devis.setStatut("A_VALIDER");
         devis.setCreatedBy(commercial.getIdUtilisateur());
         devis.setCreatedAt(LocalDateTime.now());
+
+        devis.setIdValidateur(null);
+        devis.setDateValidation(null);
         
         // Ajouter les lignes
         BigDecimal totalHt = BigDecimal.ZERO;
@@ -262,9 +265,12 @@ public class DevisService {
                 throw new RuntimeException("Validation N1 requise pour ce devis.");
             }
             devis.setStatut("ACCEPTE");
-        }
+            devis.setIdValidateur(validateur.getIdUtilisateur());
+            devis.setDateValidation(LocalDateTime.now());
 
-        devisRepository.save(devis);
+            devisRepository.save(devis);
+
+        }
     }
 
     public List<Devis> findByStatuts(List<String> statuts) {
@@ -285,11 +291,25 @@ public class DevisService {
         }
 
         devis.setStatut("REFUSE");
+        devis.setIdValidateur(user.getIdUtilisateur());
+        devis.setDateValidation(LocalDateTime.now());
+
         devisRepository.save(devis);
+
 
         // (Plus tard tu pourras enregistrer le motif dans une table d'audit)
     }
 
+    public List<Devis> findAllEnrichi() {
+    List<Devis> devisList = devisRepository.findAll();
 
+    for (Devis devis : devisList) {
+        if (devis.getIdValidateur() != null) {
+            utilisateurRepository.findById(devis.getIdValidateur())
+                .ifPresent(devis::setCreatedByUser); // ou créer setValidateurUser
+        }
+    }
+    return devisList;
+}
 
 }

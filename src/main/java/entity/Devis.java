@@ -55,6 +55,28 @@ public class Devis {
     
     @Column(name = "created_by")
     private Integer createdBy;
+
+    @Column(name = "id_validateur")
+    private Integer idValidateur;
+
+    @Column(name = "date_validation")
+    private LocalDateTime dateValidation;
+
+    public Integer getIdValidateur() {
+        return idValidateur;
+    }
+
+    public void setIdValidateur(Integer idValidateur) {
+        this.idValidateur = idValidateur;
+    }
+    public LocalDateTime getDateValidation() {
+        return dateValidation;
+    }
+
+    public void setDateValidation(LocalDateTime dateValidation) {
+        this.dateValidation = dateValidation;
+    }
+    
     
     // Transient pour les jointures
     // @Transient

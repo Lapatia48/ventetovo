@@ -27,33 +27,34 @@
     </tr>
 
     <c:forEach var="cmd" items="${commandes}">
-        <tr>
-            <td>${cmd.idCommande}</td>
-            <td>${cmd.numeroCommande}</td>
-            <td>${cmd.idClient}</td>
-            <td>${cmd.statut}</td>
-            <td>
+    <tr>
+        <td>${cmd.idCommande}</td>
+        <td>${cmd.numeroCommande}</td>
+        <td>${cmd.idClient}</td>
+        <td>${cmd.statut}</td>
+        <td>
 
-                <c:if test="${cmd.statut == 'A_VALIDER'}">
+            <c:if test="${cmd.statut == 'A_VALIDER'}">
 
-                    <form action="${pageContext.request.contextPath}/vente/commandes/valider"
-                          method="post" style="display:inline;">
-                        <input type="hidden" name="idCommande" value="${cmd.idCommande}">
-                        <button type="submit">✅ Valider</button>
-                    </form>
+                <form action="${pageContext.request.contextPath}/vente/commandes/valider"
+                      method="post" style="display:inline;">
+                    <input type="hidden" name="idCommande" value="${cmd.idCommande}">
+                    <button type="submit">✅ Valider</button>
+                </form>
 
-                    <form action="${pageContext.request.contextPath}/vente/commandes/refuser"
-                          method="post" style="display:inline;">
-                        <input type="hidden" name="idCommande" value="${cmd.idCommande}">
-                        <input type="text" name="motif" placeholder="Motif" required>
-                        <button type="submit">❌ Refuser</button>
-                    </form>
+                <form action="${pageContext.request.contextPath}/vente/commandes/refuser"
+                      method="post" style="display:inline;">
+                    <input type="hidden" name="idCommande" value="${cmd.idCommande}">
+                    <input type="text" name="motif" placeholder="Motif" required>
+                    <button type="submit">❌ Refuser</button>
+                </form>
 
-                </c:if>
+            </c:if>
 
-            </td>
-        </tr>
-    </c:forEach>
+        </td>
+    </tr>
+</c:forEach>
+
 </table>
 
 <br>

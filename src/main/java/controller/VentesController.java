@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,6 +58,10 @@ public class VentesController {
 
     @Autowired
     private LigneDevisService ligneDevisService;
+
+    @Autowired
+    private FactureClientService factureClientService;
+
 
     private VUtilisateurRole getUser(HttpSession session) {
         VUtilisateurRole user = (VUtilisateurRole) session.getAttribute("utilisateur");
@@ -491,12 +496,20 @@ public class VentesController {
         }
 
         try {
-            Utilisateur u = new Utilisateur();
-            u.setIdUtilisateur(user.getIdUtilisateur());
-            u.setIdRole(user.getIdRole());
+            // ✅ Construire l'utilisateur validateur
+            Utilisateur validateur = new Utilisateur();
+            validateur.setIdUtilisateur(user.getIdUtilisateur());
+            validateur.setIdRole(user.getIdRole());
 
-            commandeClientService.validerCommande(idCommande, u);
-            redirectAttributes.addFlashAttribute("message", "Commande validée avec succès");
+            Role role = new Role();
+            role.setIdRole(user.getIdRole());
+            role.setNomRole(user.getNomRole());
+            role.setNiveauValidation(user.getNiveauValidation());
+            validateur.setRole(role);
+
+            commandeClientService.validerCommande(idCommande, validateur);
+
+            redirectAttributes.addFlashAttribute("message", "Commande validée");
 
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -505,9 +518,10 @@ public class VentesController {
         return "redirect:/vente/commandes/a-valider";
     }
 
+
+
     @PostMapping("/commandes/refuser")
     public String refuserCommande(@RequestParam Integer idCommande,
-                                @RequestParam String motif,
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
 
@@ -518,11 +532,7 @@ public class VentesController {
         }
 
         try {
-            Utilisateur u = new Utilisateur();
-            u.setIdUtilisateur(user.getIdUtilisateur());
-            u.setIdRole(user.getIdRole());
-
-            commandeClientService.refuserCommande(idCommande, u, motif);
+            commandeClientService.refuserCommande(idCommande);
             redirectAttributes.addFlashAttribute("message", "Commande refusée");
 
         } catch (Exception e) {
@@ -533,8 +543,9 @@ public class VentesController {
     }
 
 
+
     @GetMapping("/commandes/a-valider")
-    public String commandesAValider(Model model, HttpSession session) {
+    public String listeCommandesAValider(Model model, HttpSession session) {
 
         VUtilisateurRole user = getUser(session);
         if (user == null || user.getNomRole() == null) {
@@ -542,14 +553,22 @@ public class VentesController {
             return "redirect:/user/login?id=1";
         }
 
+        String role = user.getNomRole();
+        if (!"ADMIN".equals(role) && !role.startsWith("VALIDEUR")) {
+            model.addAttribute("error", "Accès interdit");
+            return "vente/accueil";
+        }
+
         List<CommandeClient> commandes =
-                commandeClientService.findByStatut("A_VALIDER");
+                commandeClientService.findAll()
+                        .stream()
+                        .filter(c -> "A_VALIDER".equals(c.getStatut()))
+                        .toList();
 
         model.addAttribute("commandes", commandes);
         model.addAttribute("utilisateur", user);
         return "vente/liste_commandes_validation";
     }
-
 
 
     @GetMapping("/livraisons/nouveau")
@@ -661,4 +680,69 @@ public class VentesController {
 
         return "redirect:/vente/livraisons";
     }
+
+    @GetMapping("/factures")
+public String livraisonsFacturables(Model model, HttpSession session) {
+
+    VUtilisateurRole user = getUser(session);
+    if (user == null) return "redirect:/user/login?id=1";
+
+    List<LivraisonClient> livraisons =
+            livraisonClientService.findAll()
+                    .stream()
+                    .filter(l ->
+                        "LIVREE".equals(l.getStatut()) ||
+                        "PARTIELLE".equals(l.getStatut()))
+                    .toList();
+
+    model.addAttribute("livraisons", livraisons);
+    return "vente/liste_livraisons_facturables";
+}
+
+    @PostMapping("/factures/creer")
+    public String creerFacture(@RequestParam Integer idLivraison,
+                            HttpSession session,
+                            RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) return "redirect:/user/login?id=1";
+
+        try {
+            factureClientService.creerFactureDepuisLivraison(
+                    idLivraison,
+                    user.getIdUtilisateur()
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "Facture créée avec succès");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/factures";
+    }
+
+    @GetMapping("/factures/{id}")
+    public String detailFacture(@PathVariable Integer id,
+                                Model model,
+                                HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        FactureClient facture = factureClientService.findById(id);
+        List<LigneFactureClient> lignes =
+                factureClientService.findLignes(id);
+
+        model.addAttribute("facture", facture);
+        model.addAttribute("lignes", lignes);
+        model.addAttribute("utilisateur", user);
+
+        return "vente/facture_detail";
+    }
+
 }

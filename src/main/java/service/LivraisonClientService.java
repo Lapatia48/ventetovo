@@ -29,6 +29,9 @@ public class LivraisonClientService {
     @Autowired
     private UtilisateurRepository utilisateurRepository;
 
+    @Autowired
+    private VUtilisateurRoleRepository vUtilisateurRoleRepository;
+
     /**
      * Création d'une livraison depuis une commande
      */
@@ -39,21 +42,31 @@ public class LivraisonClientService {
                                            List<LigneLivraisonClient> lignes) {
 
         // 🔐 Vérifier préparateur
-        Utilisateur preparateur = utilisateurRepository.findById(idPreparateur)
+        VUtilisateurRole preparateur =
+        vUtilisateurRoleRepository.findById(idPreparateur)
                 .orElseThrow(() -> new RuntimeException("Préparateur introuvable"));
 
-        if (!"MAGASINIER".equals(preparateur.getRole().getNomRole())) {
+        if (!"MAGASINIER".equals(preparateur.getNomRole())) {
             throw new RuntimeException("Seul un magasinier peut préparer une livraison");
         }
+
 
         // 📦 Charger commande
         CommandeClient commande = commandeRepository.findById(idCommande)
                 .orElseThrow(() -> new RuntimeException("Commande introuvable"));
 
-        if (!commande.getStatut().equals("CONFIRMEE") &&
-            !commande.getStatut().equals("EN_PREPARATION")) {
-            throw new RuntimeException("Commande non livrable");
+        if (!"VALIDEE".equals(commande.getStatut()) &&
+            !"EN_PREPARATION".equals(commande.getStatut()) &&
+            !"PARTIELLEMENT_LIVREE".equals(commande.getStatut())) {
+
+            throw new RuntimeException("Commande non livrable dans son état actuel : "
+                    + commande.getStatut());
         }
+        if ("VALIDEE".equals(commande.getStatut())) {
+            commande.setStatut("EN_PREPARATION");
+            commandeRepository.save(commande);
+        }
+
 
         // 🚚 Créer livraison
         LivraisonClient livraison = new LivraisonClient();

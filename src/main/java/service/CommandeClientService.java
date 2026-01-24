@@ -121,61 +121,45 @@ public class CommandeClientService {
     @Transactional
     public void validerCommande(Integer idCommande, Utilisateur validateur) {
 
-        CommandeClient commande = commandeClientRepository.findById(idCommande)
+        CommandeClient cmd = commandeClientRepository.findById(idCommande)
                 .orElseThrow(() -> new RuntimeException("Commande introuvable"));
 
-        if (!"A_VALIDER".equals(commande.getStatut())) {
-            throw new RuntimeException("Seules les commandes à valider peuvent être validées.");
+        if (!"A_VALIDER".equals(cmd.getStatut())) {
+            throw new RuntimeException("Commande non valide pour validation");
         }
 
-        // Charger rôle
-        // ⚠️ à adapter selon votre logique
-        // enrichirAvecRole(validateur);
-
-        Integer roleId = validateur.getIdRole();
-
-        // Exemple :
-        // 1 = ADMIN
-        // 6 = RESPONSABLE_VENTES
-        if (roleId != 1 && roleId != 6) {
-            throw new RuntimeException("Vous n'avez pas le droit de valider cette commande.");
+        // Séparation des tâches (optionnelle mais recommandée)
+        if (cmd.getIdCommercial() != null &&
+            cmd.getIdCommercial().equals(validateur.getIdUtilisateur())) {
+            throw new RuntimeException("Vous ne pouvez pas valider votre propre commande.");
         }
 
-        commande.setStatut("VALIDEE");
-        commande.setIdValidateur(validateur.getIdUtilisateur());
-        commande.setDateValidation(LocalDateTime.now());
+        cmd.setStatut("VALIDEE");
+        cmd.setIdValidateur(validateur.getIdUtilisateur());
+        cmd.setDateValidation(LocalDateTime.now());
 
-        commandeClientRepository.save(commande);
+        commandeClientRepository.save(cmd);
     }
+
 
     public List<CommandeClient> findByStatut(String statut) {
         return commandeClientRepository.findByStatut(statut);
     }
 
     @Transactional
-    public void refuserCommande(Integer idCommande, Utilisateur validateur, String motif) {
+    public void refuserCommande(Integer idCommande) {
 
-        CommandeClient commande = commandeClientRepository.findById(idCommande)
+        CommandeClient cmd = commandeClientRepository.findById(idCommande)
                 .orElseThrow(() -> new RuntimeException("Commande introuvable"));
 
-        if (!"A_VALIDER".equals(commande.getStatut())) {
-            throw new RuntimeException("Seules les commandes à valider peuvent être refusées.");
+        if (!"A_VALIDER".equals(cmd.getStatut())) {
+            throw new RuntimeException("Commande non valide pour refus");
         }
 
-        Integer roleId = validateur.getIdRole();
-
-        if (roleId != 1 && roleId != 6) {
-            throw new RuntimeException("Vous n'avez pas le droit de refuser cette commande.");
-        }
-
-        commande.setStatut("ANNULEE");   // ou REFUSEE selon votre choix métier
-        commande.setIdValidateur(validateur.getIdUtilisateur());
-        commande.setDateValidation(LocalDateTime.now());
-
-        commandeClientRepository.save(commande);
-
-        // Plus tard : stocker le motif dans une table d'audit
+        cmd.setStatut("ANNULEE");
+        commandeClientRepository.save(cmd);
     }
+
 
 
 

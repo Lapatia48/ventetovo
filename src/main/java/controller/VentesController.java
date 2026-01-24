@@ -682,22 +682,36 @@ public class VentesController {
     }
 
     @GetMapping("/factures")
-public String livraisonsFacturables(Model model, HttpSession session) {
+    public String listeFactures(Model model, HttpSession session) {
 
-    VUtilisateurRole user = getUser(session);
-    if (user == null) return "redirect:/user/login?id=1";
+        VUtilisateurRole user = getUser(session);
+        if (user == null) return "redirect:/user/login?id=1";
 
-    List<LivraisonClient> livraisons =
-            livraisonClientService.findAll()
-                    .stream()
-                    .filter(l ->
-                        "LIVREE".equals(l.getStatut()) ||
-                        "PARTIELLE".equals(l.getStatut()))
-                    .toList();
+        List<FactureClient> factures = factureClientService.findAll();
 
-    model.addAttribute("livraisons", livraisons);
-    return "vente/liste_livraisons_facturables";
-}
+        model.addAttribute("factures", factures);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_factures";
+    }
+
+    @GetMapping("/factures/livraisons-facturables")
+    public String livraisonsFacturables(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) return "redirect:/user/login?id=1";
+
+        List<LivraisonClient> livraisons =
+                livraisonClientService.findAll()
+                        .stream()
+                        .filter(l ->
+                            "LIVREE".equals(l.getStatut()) ||
+                            "PARTIELLE".equals(l.getStatut()))
+                        .toList();
+
+        model.addAttribute("livraisons", livraisons);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_livraisons_facturables";
+    }
 
     @PostMapping("/factures/creer")
     public String creerFacture(@RequestParam Integer idLivraison,

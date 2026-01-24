@@ -144,5 +144,8 @@ public class FactureClientService {
         return ligneFactureRepository.findByIdFacture(idFacture);
     }
 
+    public List<FactureClient> findAll() {
+        return factureRepository.findAll();
+    }
    
 }

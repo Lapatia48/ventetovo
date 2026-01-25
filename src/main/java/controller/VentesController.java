@@ -808,3 +808,4 @@ public class VentesController {
         return "vente/dashboard";
     }
 
+}

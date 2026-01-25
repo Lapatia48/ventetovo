@@ -421,4 +421,55 @@ public class AchatController {
         
         return "redirect:/bonLivraison/list";
     }
+
+    @GetMapping("/achat/dashboard")
+    public String dashboardAchat(Model model, HttpSession session) {
+        Utilisateur utilisateur = (Utilisateur) session.getAttribute("utilisateur");
+        if (utilisateur == null) {
+            return "redirect:/user/login?id=0";
+        }
+        
+        // Statistiques réelles du module Achat
+        // 1. Nombre de demandes d'achat
+        java.util.Map<String, List<Proforma>> demandes = proformaService.getAllDemandes();
+        long nbDemandes = demandes != null ? demandes.size() : 0;
+        
+        // 2. Nombre total de proformas reçus
+        long nbProformas = 0;
+        if (demandes != null) {
+            nbProformas = demandes.values().stream().mapToLong(List::size).sum();
+        }
+        
+        // 3. Nombre de bons de commande
+        List<VBonCommande> bonCommandes = vBonCommandeService.findAll();
+        long nbBonCommandes = bonCommandes != null ? bonCommandes.size() : 0;
+        
+        // 4. Montant total des bons de commande
+        java.math.BigDecimal montantTotal = java.math.BigDecimal.ZERO;
+        if (bonCommandes != null) {
+            for (VBonCommande bc : bonCommandes) {
+                if (bc.getMontantTotal() != null) {
+                    montantTotal = montantTotal.add(new java.math.BigDecimal(bc.getMontantTotal().toString()));
+                }
+            }
+        }
+        
+        // 5. Nombre de bons de livraison
+        List<BonLivraison> bonLivraisons = bonLivraisonService.findAll();
+        long nbBonLivraisons = bonLivraisons != null ? bonLivraisons.size() : 0;
+        
+        // 6. Nombre de factures fournisseurs
+        List<FactureFournisseur> factures = factureFournisseurService.findAll();
+        long nbFactures = factures != null ? factures.size() : 0;
+        
+        model.addAttribute("nbDemandes", nbDemandes);
+        model.addAttribute("nbProformas", nbProformas);
+        model.addAttribute("nbBonCommandes", nbBonCommandes);
+        model.addAttribute("montantTotal", montantTotal);
+        model.addAttribute("nbBonLivraisons", nbBonLivraisons);
+        model.addAttribute("nbFactures", nbFactures);
+        model.addAttribute("utilisateur", utilisateur);
+        
+        return "achat/dashboard";
+    }
 }

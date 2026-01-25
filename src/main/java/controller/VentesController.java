@@ -759,4 +759,52 @@ public class VentesController {
         return "vente/facture_detail";
     }
 
-}
+    @GetMapping("/dashboard")
+    public String dashboardVente(Model model, HttpSession session) {
+        Utilisateur user = (Utilisateur) session.getAttribute("utilisateur");
+        if (user == null) {
+            return "redirect:/user/login?id=1";
+        }
+        
+        // Statistiques réelles du module Vente
+        // 1. Nombre de clients
+        List<Client> clients = clientService.findAll();
+        long nbClients = clients != null ? clients.size() : 0;
+        
+        // 2. Nombre de devis
+        List<Devis> devis = devisService.findAll();
+        long nbDevis = devis != null ? devis.size() : 0;
+        
+        // 3. Nombre de commandes clients
+        List<CommandeClient> commandes = commandeClientService.findAll();
+        long nbCommandes = commandes != null ? commandes.size() : 0;
+        
+        // 4. Nombre de livraisons
+        List<LivraisonClient> livraisons = livraisonClientService.findAll();
+        long nbLivraisons = livraisons != null ? livraisons.size() : 0;
+        
+        // 5. Nombre de factures
+        List<FactureClient> factures = factureClientService.findAll();
+        long nbFactures = factures != null ? factures.size() : 0;
+        
+        // 6. Chiffre d'affaires total
+        BigDecimal chiffreAffaires = BigDecimal.ZERO;
+        if (factures != null) {
+            for (FactureClient f : factures) {
+                if (f.getMontantTtc() != null) {
+                    chiffreAffaires = chiffreAffaires.add(f.getMontantTtc());
+                }
+            }
+        }
+        
+        model.addAttribute("nbClients", nbClients);
+        model.addAttribute("nbDevis", nbDevis);
+        model.addAttribute("nbCommandes", nbCommandes);
+        model.addAttribute("nbLivraisons", nbLivraisons);
+        model.addAttribute("nbFactures", nbFactures);
+        model.addAttribute("chiffreAffaires", chiffreAffaires);
+        model.addAttribute("utilisateur", user);
+        
+        return "vente/dashboard";
+    }
+

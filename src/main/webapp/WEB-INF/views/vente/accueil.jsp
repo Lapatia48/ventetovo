@@ -66,6 +66,7 @@
         <h1>Module Vente - Gestion Commerciale</h1>
         
         <div class="menu">
+            <a href="${pageContext.request.contextPath}/vente/dashboard">Dashboard</a>
             <a href="${pageContext.request.contextPath}/vente/articles">Liste Articles → Créer Devis</a>
              <a href="${pageContext.request.contextPath}/vente/devis">Gestion Devis</a> 
             <a href="${pageContext.request.contextPath}/vente/commandes">Gestion Commandes</a>

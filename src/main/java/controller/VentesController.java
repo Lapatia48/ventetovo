@@ -62,6 +62,8 @@ public class VentesController {
     @Autowired
     private FactureClientService factureClientService;
 
+    @Autowired
+    private ReglementClientService reglementClientService;
 
     private VUtilisateurRole getUser(HttpSession session) {
         VUtilisateurRole user = (VUtilisateurRole) session.getAttribute("utilisateur");
@@ -757,6 +759,197 @@ public class VentesController {
         model.addAttribute("utilisateur", user);
 
         return "vente/facture_detail";
+    }
+
+    @PostMapping("/factures/valider")
+    public String validerFacture(@RequestParam Integer idFacture,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            Utilisateur u = new Utilisateur();
+            u.setIdUtilisateur(user.getIdUtilisateur());
+
+            Role role = new Role();
+            role.setIdRole(user.getIdRole());
+            role.setNomRole(user.getNomRole());
+            u.setRole(role);
+
+            factureClientService.validerFacture(idFacture, u);
+
+            redirectAttributes.addFlashAttribute("message", "Facture validée avec succès");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/factures";
+    }
+
+    @GetMapping("/factures/validees")
+    public String listeFacturesValidees(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null || user.getNomRole() == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        String role = user.getNomRole();
+        if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+            model.addAttribute("error", "Accès interdit");
+            return "vente/accueil";
+        }
+
+        List<FactureClient> factures =
+                factureClientService.findByStatut("VALIDEE");
+
+        model.addAttribute("factures", factures);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_factures_validees";
+    }
+
+
+    @PostMapping("/factures/envoyer")
+    public String envoyerFacture(@RequestParam Integer idFacture,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            Utilisateur u = new Utilisateur();
+            u.setIdUtilisateur(user.getIdUtilisateur());
+
+            Role role = new Role();
+            role.setIdRole(user.getIdRole());
+            role.setNomRole(user.getNomRole());
+            u.setRole(role);
+
+            factureClientService.envoyerFacture(idFacture, u);
+            redirectAttributes.addFlashAttribute("message", "Facture envoyée avec succès");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/factures/a-encaisser";
+
+    }
+
+    @PostMapping("/factures/encaisser")
+    public String encaisserFacture(@RequestParam Integer idFacture,
+                                @RequestParam BigDecimal montant,
+                                @RequestParam String modePaiement,
+                                HttpSession session,
+                                RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            reglementClientService.encaisserFacture(
+                    idFacture,
+                    montant,
+                    modePaiement,
+                    user.getIdUtilisateur()
+            );
+
+            redirectAttributes.addFlashAttribute(
+                    "message", "Paiement enregistré avec succès");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/factures/a-encaisser";
+
+    }
+
+    @GetMapping("/factures/a-encaisser")
+    public String listeFacturesAEncaisser(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null || user.getNomRole() == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        String role = user.getNomRole();
+        if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+            model.addAttribute("error", "Accès interdit");
+            return "vente/accueil";
+        }
+
+        List<FactureClient> factures =
+                factureClientService.findAll()
+                        .stream()
+                        .filter(f ->
+                            "ENVOYEE".equals(f.getStatut()) ||
+                            "PARTIELLEMENT_PAYEE".equals(f.getStatut())
+                        )
+                        .toList();
+
+        model.addAttribute("factures", factures);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_factures_a_encaisser";
+    }
+
+
+    @GetMapping("/factures/payees")
+    public String listeFacturesPayees(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null || user.getNomRole() == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        String role = user.getNomRole();
+        if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+            model.addAttribute("error", "Accès interdit");
+            return "vente/accueil";
+        }
+
+        List<FactureClient> factures =
+                factureClientService.findByStatut("PAYEE");
+
+        model.addAttribute("factures", factures);
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_factures_payees";
+    }
+
+    @GetMapping("/reglements")
+    public String listeReglements(Model model, HttpSession session) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null || user.getNomRole() == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        String role = user.getNomRole();
+        if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+            model.addAttribute("error", "Accès interdit");
+            return "vente/accueil";
+        }
+
+        model.addAttribute("reglements", reglementClientService.findAll());
+        model.addAttribute("utilisateur", user);
+        return "vente/liste_reglements";
     }
 
 }

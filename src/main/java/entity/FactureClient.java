@@ -45,6 +45,9 @@ public class FactureClient {
     @Column(name = "montant_paye")
     private BigDecimal montantPaye;
 
+    @Column(name = "solde_restant", insertable = false, updatable = false)
+    private BigDecimal soldeRestant;
+
     @Column(name = "mode_paiement")
     private String modePaiement;
 
@@ -91,6 +94,9 @@ public class FactureClient {
 
     public BigDecimal getMontantPaye() { return montantPaye; }
     public void setMontantPaye(BigDecimal montantPaye) { this.montantPaye = montantPaye; }
+
+    public BigDecimal getSoldeRestant() { return soldeRestant; }
+    public void setSoldeRestant(BigDecimal soldeRestant) { this.soldeRestant = soldeRestant; }
 
     public String getModePaiement() { return modePaiement; }
     public void setModePaiement(String modePaiement) { this.modePaiement = modePaiement; }

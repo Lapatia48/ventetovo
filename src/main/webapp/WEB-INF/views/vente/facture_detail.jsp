@@ -41,6 +41,27 @@
             <td>${l.montantTtc}</td>
         </tr>
     </c:forEach>
+    <c:if test="${facture.statut == 'ENVOYEE' || facture.statut == 'PARTIELLEMENT_PAYEE'}">
+    <form action="${pageContext.request.contextPath}/vente/factures/encaisser"
+          method="post">
+
+        <input type="hidden" name="idFacture" value="${facture.idFacture}" />
+
+        Montant :
+        <input type="number" name="montant" step="0.01" required />
+
+        Mode :
+        <select name="modePaiement">
+            <option value="VIREMENT">Virement</option>
+            <option value="CHEQUE">Chèque</option>
+            <option value="CARTE">Carte</option>
+            <option value="ESPECES">Espèces</option>
+        </select>
+
+        <button type="submit">💰 Encaisser</button>
+    </form>
+</c:if>
+
 </table>
 
 <hr>

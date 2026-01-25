@@ -72,6 +72,11 @@
             <a href="${pageContext.request.contextPath}/vente/livraisons">Gestion Livraisons</a>
             <a href="${pageContext.request.contextPath}/vente/commandes/a-valider">Validation Commandes</a>
             <a href="${pageContext.request.contextPath}/vente/factures">Gestion Factures</a>
+            <a href="${pageContext.request.contextPath}/vente/factures">Toutes les factures</a>
+            <a href="${pageContext.request.contextPath}/vente/factures/validees">Factures validées</a>
+            <a href="${pageContext.request.contextPath}/vente/factures/a-encaisser">Factures à encaisser</a>
+            <a href="${pageContext.request.contextPath}/vente/reglements">Historique règlements</a>
+            <a href="${pageContext.request.contextPath}/vente/factures/payees">Factures payées</a>
 
             <!-- <a href="${pageContext.request.contextPath}/vente/clients">Gestion Clients</a> -->
         </div>

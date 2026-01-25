@@ -3,11 +3,12 @@
 
 <html>
 <head>
-    <title>Liste Factures</title>
+    <title>Factures payées</title>
 </head>
 <body>
 
-<h2>📄 Gestion Factures</h2>
+<h2>💰 Factures payées</h2>
+
 
 <c:if test="${not empty message}">
     <p style="color:green">${message}</p>
@@ -25,6 +26,8 @@
         <th>Date</th>
         <th>Statut</th>
         <th>Total TTC</th>
+        <th>Montant Payé</th>
+        <th>Solde Restant</th>
         <th>Action</th>
     </tr>
 
@@ -36,33 +39,39 @@
             <td>${f.dateFacture}</td>
             <td>${f.statut}</td>
             <td>${f.montantTtc}</td>
+            <td>${f.montantPaye}</td>
+            <td>${f.soldeRestant}</td>
+            <td>
+            <c:choose>
+                <c:when test="${f.statut == 'PAYEE'}">
+                     Payée
+                </c:when>
+                <c:when test="${f.statut == 'PARTIELLEMENT_PAYEE'}">
+                     Partiellement payée
+                </c:when>
+                <c:otherwise>
+                    ${f.statut}
+                </c:otherwise>
+            </c:choose>
+        </td>
+
             <td>
                 <a href="${pageContext.request.contextPath}/vente/factures/${f.idFacture}">
                     👁 Voir
                 </a>
-                <c:if test="${f.statut == 'BROUILLON'}">
-                <form action="${pageContext.request.contextPath}/vente/factures/valider"
-                    method="post" style="display:inline;">
+                <form method="post"
+                      action="${pageContext.request.contextPath}/vente/factures/envoyer"
+                      style="display:inline;">
                     <input type="hidden" name="idFacture" value="${f.idFacture}" />
-                    <button type="submit">✅ Valider</button>
+                    <button type="submit"> Envoyer</button>
                 </form>
-            </c:if>
-            <c:if test="${f.statut == 'VALIDEE'}">
-                <form action="${pageContext.request.contextPath}/vente/factures/envoyer"
-                    method="post" style="display:inline;">
-                    <input type="hidden" name="idFacture" value="${f.idFacture}" />
-                    <button type="submit">📤 Envoyer</button>
-                </form>
-            </c:if>
-
             </td>
-             
         </tr>
     </c:forEach>
 </table>
 
 <br>
-<a href="${pageContext.request.contextPath}/vente/factures/livraisons-facturables">📄 Livraisons facturables</a>
+<a href="${pageContext.request.contextPath}/vente/factures">📄 Toutes les Factures</a>
 <br>
 <a href="${pageContext.request.contextPath}/vente/accueil">⬅ Retour</a>
 

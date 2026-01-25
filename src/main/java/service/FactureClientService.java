@@ -130,6 +130,13 @@ public class FactureClientService {
         return facture;
     }
 
+    public List<FactureClient> findEncaisables() {
+        return factureRepository.findByStatutIn(
+                List.of("ENVOYEE", "PARTIELLEMENT_PAYEE")
+        );
+    }
+
+
 
     private String genererNumeroFacture() {
         return "FAC-" + System.currentTimeMillis();
@@ -147,5 +154,52 @@ public class FactureClientService {
     public List<FactureClient> findAll() {
         return factureRepository.findAll();
     }
+    @Transactional
+    public void validerFacture(Integer idFacture, Utilisateur validateur) {
+
+        FactureClient facture = factureRepository.findById(idFacture)
+                .orElseThrow(() -> new RuntimeException("Facture introuvable"));
+
+        if (!"BROUILLON".equals(facture.getStatut())) {
+            throw new RuntimeException("Seules les factures en BROUILLON peuvent être validées");
+        }
+
+        // 🔐 Chargement du rôle si nécessaire
+        if (validateur.getRole() == null) {
+            throw new RuntimeException("Rôle utilisateur non chargé");
+        }
+
+        String role = validateur.getRole().getNomRole();
+        if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+            throw new RuntimeException("Vous n'avez pas le droit de valider une facture");
+        }
+
+        facture.setStatut("VALIDEE");
+        factureRepository.save(facture);
+    }
+
+@Transactional
+public void envoyerFacture(Integer idFacture, Utilisateur user) {
+
+    FactureClient facture = factureRepository.findById(idFacture)
+            .orElseThrow(() -> new RuntimeException("Facture introuvable"));
+
+    if (!"VALIDEE".equals(facture.getStatut())) {
+        throw new RuntimeException("Seules les factures VALIDEE peuvent être envoyées");
+    }
+
+    String role = user.getRole().getNomRole();
+    if (!"ADMIN".equals(role) && !"COMPTABLE".equals(role)) {
+        throw new RuntimeException("Vous n'avez pas le droit d'envoyer une facture");
+    }
+
+    facture.setStatut("ENVOYEE");
+    factureRepository.save(facture);
+}
+
+    public List<FactureClient> findByStatut(String statut) {
+        return factureRepository.findByStatut(statut);
+    }
+
    
 }

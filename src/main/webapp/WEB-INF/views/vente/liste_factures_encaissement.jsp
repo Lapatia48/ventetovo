@@ -3,11 +3,11 @@
 
 <html>
 <head>
-    <title>Liste Factures</title>
+    <title>💰 Factures à encaisser</title>
 </head>
 <body>
 
-<h2>📄 Gestion Factures</h2>
+<h2>💰 Factures à encaisser</h2>
 
 <c:if test="${not empty message}">
     <p style="color:green">${message}</p>
@@ -17,7 +17,7 @@
     <p style="color:red">${error}</p>
 </c:if>
 
-<table border="1" width="100%">
+<table border="1" cellpadding="5">
     <tr>
         <th>Numéro</th>
         <th>Client</th>
@@ -38,31 +38,13 @@
             <td>${f.montantTtc}</td>
             <td>
                 <a href="${pageContext.request.contextPath}/vente/factures/${f.idFacture}">
-                    👁 Voir
+                    👁 Voir / Encaisser
                 </a>
-                <c:if test="${f.statut == 'BROUILLON'}">
-                <form action="${pageContext.request.contextPath}/vente/factures/valider"
-                    method="post" style="display:inline;">
-                    <input type="hidden" name="idFacture" value="${f.idFacture}" />
-                    <button type="submit">✅ Valider</button>
-                </form>
-            </c:if>
-            <c:if test="${f.statut == 'VALIDEE'}">
-                <form action="${pageContext.request.contextPath}/vente/factures/envoyer"
-                    method="post" style="display:inline;">
-                    <input type="hidden" name="idFacture" value="${f.idFacture}" />
-                    <button type="submit">📤 Envoyer</button>
-                </form>
-            </c:if>
-
             </td>
-             
         </tr>
     </c:forEach>
 </table>
 
-<br>
-<a href="${pageContext.request.contextPath}/vente/factures/livraisons-facturables">📄 Livraisons facturables</a>
 <br>
 <a href="${pageContext.request.contextPath}/vente/accueil">⬅ Retour</a>
 

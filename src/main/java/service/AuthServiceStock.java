@@ -18,7 +18,7 @@ public class AuthServiceStock {
 
         // username = email
         return utilisateurRepository
-                .findByEmailAndMotDePasseAndActifTrue(username, password)
+                .findActiveUserWithRole(username, password)
                 .orElse(null);
     }
 

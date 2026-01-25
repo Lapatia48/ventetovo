@@ -1,0 +1,4 @@
+- Transfert marchandise dépôt vers dépôt
+- Réservation(optionnel)
+- Inventaire par depot
+- Comparaison mouvement_stock_calcul et inventaire

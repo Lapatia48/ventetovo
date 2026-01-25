@@ -531,3 +531,67 @@ CREATE TRIGGER trg_mouvement_stock
 AFTER INSERT ON mouvement_stock
 FOR EACH ROW
 EXECUTE FUNCTION fn_mouvement_stock();
+
+
+
+
+
+
+
+
+
+CREATE OR REPLACE VIEW vue_stock_actuel AS
+
+/* =========================================================
+   CMUP ARTICLES → last snapshot from mouvement_stock_calcul
+   ========================================================= */
+SELECT
+    msc.id,
+    msc.id_depot,
+    msc.id_methode_article,
+    msc.id_article,
+    msc.quantite_article,
+    msc.prix_total,
+    msc.prix_par_methode,
+    msc.date_mouvement
+FROM mouvement_stock_calcul msc
+JOIN (
+    SELECT
+        id_article,
+        id_depot,
+        MAX(id) AS max_id
+    FROM mouvement_stock_calcul
+    GROUP BY id_article, id_depot
+) last_msc
+    ON msc.id = last_msc.max_id
+JOIN methode_article ma
+    ON ma.id_methode_article = msc.id_methode_article
+JOIN methode_calcul_stock mcs
+    ON mcs.id_methode = ma.id_methode
+WHERE mcs.nom_methode = 'CMUP'
+
+UNION ALL
+
+/* =========================================================
+   FIFO / LIFO ARTICLES → one row per lot (NO aggregation)
+   ========================================================= */
+SELECT
+    ls.id_lot AS id,
+    ls.id_depot,
+    ma.id_methode_article,
+    ls.id_article,
+    ls.quantite_restante AS quantite_article,
+    (ls.quantite_restante * ls.prix_unitaire)::NUMERIC(15,3) AS prix_total,
+    ls.prix_unitaire AS prix_par_methode,
+    ls.date_entree AS date_mouvement
+FROM lot_stock ls
+JOIN methode_article ma
+    ON ma.id_article = ls.id_article
+JOIN methode_calcul_stock mcs
+    ON mcs.id_methode = ma.id_methode
+WHERE mcs.nom_methode IN ('FIFO', 'LIFO');
+
+
+
+
+

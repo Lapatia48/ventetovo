@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connexion - Ventetovo</title>
   <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/login_stock.css">
+  <title>Connexion - Ventetovo</title>
 </head>
 <body>
   <div class="login-container">
@@ -14,7 +14,7 @@
     
     <form action="${pageContext.request.contextPath}/login" method="POST">
       <div class="form-group">
-        <label for="username">Nom d'utilisateur</label>
+        <label for="username">Email</label>
         <input type="text" id="username" name="username" required>
       </div>
       

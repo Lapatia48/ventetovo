@@ -1,0 +1,131 @@
+/* Global reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Body background */
+body {
+    background-color: #f4ffe1;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    gap: 20px;
+}
+
+/* LEFT PART — Navbar (2/5) */
+.navbar {
+    width: 20%; /* 2/5 */
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Navbar title */
+.navbar h2 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Navbar links */
+.navbar ul {
+    list-style: none;
+}
+
+.navbar ul li {
+    margin-bottom: 15px;
+}
+
+.navbar ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    display: block;
+    padding: 8px 10px;
+    border-radius: 10px;
+}
+
+.navbar ul li a:hover {
+    background-color: #afff25;
+    color: white;
+}
+
+/* RIGHT PART — Content (3/5) */
+.content-wrapper {
+    width: 80%; /* 3/5 */
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Content title */
+.content-wrapper h1 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #333;
+}
+
+/* ===== TABLE WRAPPER ===== */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== TABLE HEADER ===== */
+table thead {
+    background-color: #bff36a;
+}
+
+table thead th {
+    padding: 14px 16px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+/* ===== TABLE BODY ===== */
+table tbody tr {
+    background-color: #f2ffdc;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+}
+
+/* ===== TABLE CELLS ===== */
+table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: #2b2b2b;
+    border-bottom: 1px solid #f2ffdc;
+}
+
+/* Remove last border */
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ===== ALIGNMENT HELPERS ===== */
+table th,
+table td {
+    text-align: left;
+    vertical-align: middle;
+}
+

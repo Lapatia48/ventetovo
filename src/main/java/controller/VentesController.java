@@ -759,7 +759,7 @@ public class VentesController {
         return "vente/facture_detail";
     }
 
-    @GetMapping("/dashboard")
+    @GetMapping("/vente/dashboard")
     public String dashboardVente(Model model, HttpSession session) {
         Utilisateur user = (Utilisateur) session.getAttribute("utilisateur");
         if (user == null) {

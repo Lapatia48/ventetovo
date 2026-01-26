@@ -16,6 +16,19 @@
     <nav class="sidebar-nav">
         <ul class="nav-menu">
             <li class="nav-item">
+                <a href="${pageContext.request.contextPath}/achat/dashboard" class="nav-link">
+                    <span class="nav-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" str oke-width="2">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                    </span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="${pageContext.request.contextPath}/achat/achat?id=0" class="nav-link">
                     <span class="nav-icon">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

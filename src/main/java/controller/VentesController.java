@@ -62,6 +62,9 @@ public class VentesController {
     @Autowired
     private FactureClientService factureClientService;
 
+    @Autowired
+    private ReglementClientService reglementClientService;
+
 
     private VUtilisateurRole getUser(HttpSession session) {
         VUtilisateurRole user = (VUtilisateurRole) session.getAttribute("utilisateur");
@@ -752,11 +755,51 @@ public class VentesController {
         List<LigneFactureClient> lignes =
                 factureClientService.findLignes(id);
 
+        java.math.BigDecimal montantPaye =
+                java.util.Optional.ofNullable(facture.getMontantPaye())
+                        .orElse(java.math.BigDecimal.ZERO);
+        java.math.BigDecimal montantTtc =
+                java.util.Optional.ofNullable(facture.getMontantTtc())
+                        .orElse(java.math.BigDecimal.ZERO);
+        java.math.BigDecimal resteAPayer = montantTtc.subtract(montantPaye);
+
         model.addAttribute("facture", facture);
         model.addAttribute("lignes", lignes);
+        model.addAttribute("montantPaye", montantPaye);
+        model.addAttribute("resteAPayer", resteAPayer.compareTo(java.math.BigDecimal.ZERO) < 0 ? java.math.BigDecimal.ZERO : resteAPayer);
         model.addAttribute("utilisateur", user);
 
         return "vente/facture_detail";
+    }
+
+    @PostMapping("/factures/{id}/encaisser")
+    public String encaisserFacture(@PathVariable Integer id,
+                                   @RequestParam("montant") java.math.BigDecimal montant,
+                                   @RequestParam("modeReglement") String modeReglement,
+                                   @RequestParam(value = "referencePaiement", required = false) String referencePaiement,
+                                   HttpSession session,
+                                   RedirectAttributes redirectAttributes) {
+
+        VUtilisateurRole user = getUser(session);
+        if (user == null) {
+            session.invalidate();
+            return "redirect:/user/login?id=1";
+        }
+
+        try {
+            reglementClientService.encaisserFacture(
+                    id,
+                    montant,
+                    modeReglement,
+                    referencePaiement,
+                    user.getIdUtilisateur()
+            );
+            redirectAttributes.addFlashAttribute("message", "Encaissement enregistré");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        return "redirect:/vente/factures/" + id;
     }
 
     @GetMapping("/vente/dashboard")

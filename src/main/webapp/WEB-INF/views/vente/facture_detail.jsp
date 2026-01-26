@@ -7,6 +7,13 @@
 </head>
 <body>
 
+<c:if test="${not empty message}">
+    <div style="padding:10px; background:#e6ffed; border:1px solid #b7f5c8; margin-bottom:16px;">${message}</div>
+</c:if>
+<c:if test="${not empty error}">
+    <div style="padding:10px; background:#ffecec; border:1px solid #f5b7b1; margin-bottom:16px; color:#a40000;">${error}</div>
+</c:if>
+
 <h2>📄 Facture ${facture.numeroFacture}</h2>
 
 <p><strong>Client :</strong> ${facture.idClient}</p>
@@ -49,6 +56,30 @@
 <p><strong>Total HT :</strong> ${facture.montantTotalHt}</p>
 <p><strong>Total TVA :</strong> ${facture.montantTva}</p>
 <p><strong>Total TTC :</strong> ${facture.montantTtc}</p>
+<p><strong>Montant payé :</strong> ${montantPaye}</p>
+<p><strong>Reste à payer :</strong> ${resteAPayer}</p>
+
+<hr>
+
+<h3>Enregistrer un encaissement</h3>
+<form action="${pageContext.request.contextPath}/vente/factures/${facture.idFacture}/encaisser" method="post">
+    <label for="montant">Montant</label>
+    <input type="number" step="0.01" min="0" name="montant" id="montant" required>
+    <br>
+    <label for="modeReglement">Mode de règlement</label>
+    <select name="modeReglement" id="modeReglement" required>
+        <option value="VIREMENT">Virement</option>
+        <option value="CHEQUE">Chèque</option>
+        <option value="CARTE">Carte</option>
+        <option value="ESPECES">Espèces</option>
+        <option value="PRELEVEMENT">Prélèvement</option>
+    </select>
+    <br>
+    <label for="referencePaiement">Référence (optionnel)</label>
+    <input type="text" name="referencePaiement" id="referencePaiement" placeholder="N° de chèque, ref virement...">
+    <br><br>
+    <button type="submit">Enregistrer le paiement</button>
+</form>
 
 <br>
 <a href="${pageContext.request.contextPath}/vente/factures">⬅ Retour</a>
